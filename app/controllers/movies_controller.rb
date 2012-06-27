@@ -7,20 +7,25 @@ class MoviesController < ApplicationController
   end
 
   def index
+    redirect = false
     if params.has_key?(:ratings)
       @current_ratings = params[:ratings]
     elsif session.has_key?(:ratings)
-      @current_ratings = session[:ratings]
+      params.merge!(:ratings => session[:ratings])
+      redirect = true
     else
       @current_ratings = Hash.new
     end
     if params.has_key?(:sort_by)
       @sort_by = params[:sort_by]
     elsif session.has_key?(:sort_by)
-      @sort_by = session[:sort_by]
+      params.merge!(:sort_by => session[:sort_by])
+      redirect = true
     else
       @sort_by = ""
     end
+    redirect_to params if redirect
+    @current_ratings = params[:ratings] if @current_ratings.nil?
     @movies = Movie.where(:rating => @current_ratings.keys).order(@sort_by)
     @all_ratings = ratings
     session[:sort_by] = @sort_by
