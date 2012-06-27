@@ -7,7 +7,24 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    if params.has_key?(:ratings)
+      @current_ratings = params[:ratings]
+    elsif session.has_key?(:ratings)
+      @current_ratings = session[:ratings]
+    else
+      @current_ratings = Hash.new
+    end
+    if params.has_key?(:sort_by)
+      @sort_by = params[:sort_by]
+    elsif session.has_key?(:sort_by)
+      @sort_by = session[:sort_by]
+    else
+      @sort_by = ""
+    end
+    @movies = Movie.where(:rating => @current_ratings.keys).order(@sort_by)
+    @all_ratings = ratings
+    session[:sort_by] = @sort_by
+    session[:ratings] = @current_ratings
   end
 
   def new
@@ -37,5 +54,10 @@ class MoviesController < ApplicationController
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
   end
+
+  def ratings
+    Movie::RATINGS
+  end
+
 
 end
