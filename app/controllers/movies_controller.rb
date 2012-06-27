@@ -24,7 +24,7 @@ class MoviesController < ApplicationController
     else
       @sort_by = ""
     end
-    redirect_to params if redirect
+    (flash.keep; redirect_to params) if redirect
     @current_ratings = params[:ratings] if @current_ratings.nil?
     @movies = Movie.where(:rating => @current_ratings.keys).order(@sort_by)
     @all_ratings = ratings
