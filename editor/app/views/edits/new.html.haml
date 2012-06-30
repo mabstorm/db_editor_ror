@@ -1,0 +1,23 @@
+%h1 Create New Movie
+
+= form_tag edits_path do
+
+  = label :edit, :synsetid, 'Synsetid'
+  = text_field :edit, 'synsetid'
+
+  = label :edit, :definition, 'Definition'
+  = text_field :edit, 'definition'
+
+  = label :edit, :members, 'Members'
+  %table#members
+    %thead
+      %tr  
+        %th= 'Word'
+        %th= 'Sensekey'
+    %tbody
+      %tr
+        %td= text_field :members, 'new_member', 'value' => ''
+        %td= text_field :members, 'new_member|new_key', 'value' => ''
+
+  %br
+  = submit_tag 'Save Changes'

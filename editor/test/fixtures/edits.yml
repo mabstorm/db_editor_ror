@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  synsetid: 1
+  definition: MyText
+  members: MyText
+
+two:
+  synsetid: 1
+  definition: MyText
+  members: MyText

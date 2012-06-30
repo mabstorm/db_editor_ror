@@ -1,0 +1,21 @@
+-# in app/views/edits/show.html.haml
+
+%h2 Details about #{@edit.synsetid}
+
+%ul#details
+  %li
+    Definition:
+    = @edit.definition
+  %li
+    Members:
+    %ul
+      - @edit.members.each_pair do |member, key|
+        %li= "#{member}=>#{key}\n"
+
+%h3 Definition:
+
+%p#definition= @edit.definition
+
+= link_to 'Edit', edit_edit_path(@edit)
+= button_to 'Delete', edit_path(@edit), :method => :delete, :confirm => 'Are you sure?'
+= link_to 'Back to edit list', edits_path
