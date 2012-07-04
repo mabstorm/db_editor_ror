@@ -1,0 +1,12 @@
+%h1 Please Login
+%br
+= form_tag sessions_path do
+  %table#login
+    %tr
+      %td= 'Username:'
+      %td= text_field :username, 'username', :size => '20x1'
+    %tr
+      %td= 'Password:'
+      %td= password_field_tag :password
+    %br
+  = submit_tag "Login"

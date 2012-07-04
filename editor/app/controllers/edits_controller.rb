@@ -1,23 +1,20 @@
 class EditsController < ApplicationController
   include EditsHelper
   def show
+    return force_login if !admin?
     id = params[:id] # retrieve edit ID from URI route
     @edit = Edit.find(id) # look up edit by unique ID
     # will render app/views/edits/show.<extension> by default
   end
 
+  def force_login
+    redirect_to login_path
+  end
+
   def index
+    return force_login if !admin?
     redirect = false
-=begin
-    if params.has_key?(:synsetid)
-      @current_ratings = params[:synsetid]
-    elsif session.has_key?(:synsetid)
-      params.merge!(:synsetid => session[:synsetid])
-      redirect = true
-    else
-      @current_ratings = Hash.new
-    end
-=end
+
     if params.has_key?(:sort_by)
       @sort_by = params[:sort_by]
     elsif session.has_key?(:sort_by)
@@ -26,12 +23,9 @@ class EditsController < ApplicationController
     else
       @sort_by = ""
     end
-    (flash.keep; redirect_to params) if redirect
-    #@current_ratings = params[:synsetid] if @current_ratings.nil?
-    #@edits = Edit.where(:rating => @current_ratings.keys).order(@sort_by)
-    #@all_options = options
+    (flash.keep; return redirect_to params) if redirect
+
     session[:sort_by] = @sort_by
-    #session[:synsetid] = @current_ratings
     @all_edits = Edit.order(@sort_by)
   end
 
@@ -40,6 +34,7 @@ class EditsController < ApplicationController
   end
 
   def create
+    return force_login if !admin?
     @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition]})
     @edit.update_attribute("members", deserialize_members(params[:members]))
     flash[:notice] = "#{@edit.synsetid} was successfully created."
@@ -47,6 +42,7 @@ class EditsController < ApplicationController
   end
 
   def edit
+    return force_login if !admin?
     @edit = Edit.find_by_id(params[:id])
     if @edit.nil?
       params[:edit] = Hash.new
@@ -58,6 +54,7 @@ class EditsController < ApplicationController
   end
 
   def update
+    return force_login if !admin?
     @edit = Edit.find params[:id]
     message = nil
     if (params[:add_member])
@@ -90,6 +87,7 @@ class EditsController < ApplicationController
   end
 
   def destroy
+    return force_login if !admin?
     @edit = Edit.find(params[:id])
     @edit.destroy
     flash[:notice] = "Edit '#{@edit.synsetid}' deleted."

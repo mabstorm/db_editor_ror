@@ -1,4 +1,4 @@
-Editor::Application.routes.draw do
+Editor::Application.routes.draw do 
   get "edits/index"
 
   # The priority is based upon order of creation:
@@ -13,7 +13,9 @@ Editor::Application.routes.draw do
   # This route can be invoked with purchase_url(:id => product.id)
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
-  resources :edits
+  resources :edits, :sessions
+  match 'login', :to => 'sessions#new', :as => 'login'
+  match 'logout', :to => 'sessions#destroy', :as => 'logout'
 
   # Sample resource route with options:
   #   resources :products do
@@ -50,7 +52,7 @@ Editor::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  root :to => 'home#index'
+  root :to => 'sessions#new'
 
   # See how all your routes lay out with "rake routes"
 
