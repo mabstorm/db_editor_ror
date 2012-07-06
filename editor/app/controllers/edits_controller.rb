@@ -1,5 +1,5 @@
 class EditsController < ApplicationController
-  include EditsHelper
+  include EditsHelper, InfogetterHelper
   def show
     return force_login if !admin?
     id = params[:id] # retrieve edit ID from URI route
@@ -30,7 +30,7 @@ class EditsController < ApplicationController
   end
 
   def new
-    
+    return force_login if !admin?
   end
 
   def create
@@ -80,6 +80,14 @@ class EditsController < ApplicationController
     @edit.update_attribute("definition", params[:edit][:definition])
     @edit.update_attribute("members", deserialize_members(params[:members]))
 
+    session[:results] = ''
+    session[:this_query] = ''
+    if params[:freebase]
+      if params[:freebase][:query] && params[:freebase][:query]!=""
+      session[:this_query] = params[:freebase][:query]
+      session[:results] = query(session[:this_query].downcase.gsub(/\s/,'_'))
+      end
+    end
 
     #@edit.update_attributes!(params[:edit])
     flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?

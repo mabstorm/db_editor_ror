@@ -1,4 +1,6 @@
 Editor::Application.routes.draw do 
+
+
   get "edits/index"
 
   # The priority is based upon order of creation:
@@ -14,6 +16,7 @@ Editor::Application.routes.draw do
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   resources :edits, :sessions
+  match 'query', :to => 'infogetter#index', :as => 'query'
   match 'login', :to => 'sessions#new', :as => 'login'
   match 'logout', :to => 'sessions#destroy', :as => 'logout'
 
