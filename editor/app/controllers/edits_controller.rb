@@ -58,36 +58,20 @@ class EditsController < ApplicationController
     @edit = Edit.find params[:id]
     message = nil
     if (params[:add_member])
-      if params[:members].nil?
-        params[:members] = Hash.new
-      end
-      params[:members]['new entry'] = ''
-      params[:members]['new entry|'] = ''
+      add_member_action
       message = 'added'
     elsif (params[:delete_members])
-      params[:check_box].each_pair do |mem,to_del|
-        if (to_del=="1")
-          params[:members].delete("old_#{mem.gsub('delete_','')}") 
-        end
-      end
-      params[:members] = clean_hash(params[:members])
+      delete_member_action
       message = 'deleted'
     elsif (params[:update_members])
-      params[:members] = clean_hash(params[:members])
+      update_members_action
       message = 'updated'
     end
-    @edit.update_attribute("synsetid", params[:edit][:synsetid])
-    @edit.update_attribute("definition", params[:edit][:definition])
-    @edit.update_attribute("members", deserialize_members(params[:members]))
 
-    session[:results] = ''
-    session[:this_query] = ''
-    if params[:freebase]
-      if params[:freebase][:query] && params[:freebase][:query]!=""
-      session[:this_query] = params[:freebase][:query]
-      session[:results] = query(session[:this_query].downcase.gsub(/\s/,'_'))
-      end
-    end
+    update_from_params(@edit)
+
+    # searching for something on the side using Freebase
+    update_freebase_session
 
     #@edit.update_attributes!(params[:edit])
     flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?

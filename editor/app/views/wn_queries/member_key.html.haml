@@ -1,0 +1,10 @@
+%table#members
+  %thead
+    %tr
+      %th= 'Member'
+      %th= 'Sensekey'
+  %tbody
+    - members_and_keys.each do |member, key|
+      %tr
+        %td= member
+        %td= key

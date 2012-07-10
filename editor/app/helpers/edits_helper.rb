@@ -22,9 +22,39 @@ module EditsHelper
     return members_hash
   end
 
+
+
   def clean_hash(hash)
     hash.delete_if {|k,v| k==""||v==""}
     return hash
   end
+
+
+  def add_member_action
+    if params[:members].nil?
+      params[:members] = Hash.new
+    end
+    params[:members]['new entry'] = ''
+    params[:members]['new entry|'] = ''
+  end
+
+  def delete_member_action
+    params[:check_box].each_pair do |mem,to_del|
+      if (to_del=="1")
+        params[:members].delete("old_#{mem.gsub('delete_','')}") 
+      end
+    end
+    params[:members] = clean_hash(params[:members])
+  end
+
+  def update_members_action
+    params[:members] = clean_hash(params[:members])
+  end
+
+  def update_from_params(edit)
+    edit.update_attribute("synsetid", params[:edit][:synsetid])
+    edit.update_attribute("definition", params[:edit][:definition])
+    edit.update_attribute("members", deserialize_members(params[:members]))  end
+
 
 end

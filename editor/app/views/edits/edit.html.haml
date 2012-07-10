@@ -1,50 +1,59 @@
 -# edit.html.haml using partial
 
+%body
 
-= form_tag edit_path(@edit), :method => :put do
-  #mainform
-    %h1 Edit Existing Entry
-    = label :edit, :synsetid, 'Synsetid'
-    = text_field :edit, 'synsetid'
-    %br
-    = label :edit, :definition, 'Definition'
-    = text_area :edit, 'definition', :size => "60x5"
-    %br
-    = label :edit, :members, 'Members'
-    %br
-    %table#members
-      %thead
-        %tr  
-          %th
-          %th= 'Word'
-          %th= 'Sensekey'
-      %tbody
-        - @edit.members.each_pair do |member, key|
-          %tr
-            %td= check_box :check_box, 'delete_'+member
-            %td= text_field :members, 'old_'+member, 'value' => member, :size=>'10'
-            %td= text_field :members, ('old_'+member+'|'+'old_'+key), 'value' => key, :size=>15
-    %br
-    = submit_tag 'Update Entry Info', :name => 'update_members'
-    = submit_tag 'Add member', :name => 'add_member'
-    = submit_tag 'Delete checked', :name => 'delete_members'
-
-    %br
-    = @message
-    %br
-    = link_to 'Return to list', edits_path
+  = form_tag edit_path(@edit), :id => 'editsform', :method => :put do
+    #header
+      = ''
+    #container
+      
+      .column#center
+        %h1 Make an info query
 
 
-  #lookup
-    %h1 Make an info query
+        = label :ig, :query, 'Query'
+        = text_field :freebase, 'query', :value => session[:this_query]
+
+        = submit_tag 'Submit query', :name => 'query'
+        %br
+        = session[:results]
+      .column#left
+        %h1 Edit Existing Entry
+        = label :edit, :synsetid, 'Synsetid'
+        = text_field :edit, 'synsetid', :size => '10'
+        %br
+        = label :edit, :definition, 'Definition'
+        = text_area :edit, 'definition', :size => '10x8'
+        %br
+        = label :edit, :members, 'Members'
+        %br
+        %table#members
+          %thead
+            %tr  
+              %th
+              %th= 'Word'
+              %th= 'Sensekey'
+          %tbody
+            - @edit.members.each_pair do |member, key|
+              %tr
+                %td= check_box :check_box, 'delete_'+member
+                %td= text_field :members, 'old_'+member, 'value' => member, :size=>'10'
+                %td= text_field :members, ('old_'+member+'|'+'old_'+key), 'value' => key, :size=>15
+        %br
+        = submit_tag 'Update Info', :name => 'update_members'
+        = submit_tag 'Add member', :name => 'add_member'
+        = submit_tag 'Delete checked', :name => 'delete_members'
+
+        %br
+        = @message
+        %br
+        = link_to 'Return to list', edits_path
 
 
-    = label :ig, :query, 'Query'
-    = text_field :freebase, 'query', :value => session[:this_query]
+      .column#right
+        %h1 WordNet Query
 
-    = submit_tag 'Submit query', :name => 'query'
-    %br
-    = session[:results]
-
-%br
-%br
+    #footer
+      = ''
+  %br
+  %br

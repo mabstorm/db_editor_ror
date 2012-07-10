@@ -3,8 +3,8 @@ class ApplicationController < ActionController::Base
   force_ssl
 
   def admin?
-    #session[:username] == 'workingprogress' && session[:password] == 'simplepass1'
-    true
+    session[:username] == 'workingprogress' && session[:password] == 'simplepass1'
+    return true
   end
 
 end

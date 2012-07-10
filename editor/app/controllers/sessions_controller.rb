@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
   def create
     reset_session
     session[:password] = params[:password]
+    session[:username] = params[:username].first
     if admin?
       redirect_to edits_path
     else
