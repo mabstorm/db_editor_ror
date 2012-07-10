@@ -10,19 +10,17 @@ module InfogetterHelper
 
   def query(word)
     begin
-      JSON.parse(HTTPClient.get_content(query_string(word)))["result"]
+      JSON.parse(HTTPClient.get_content(query_string(word.downcase.gsub(/\s/,'_'))))["result"]
     rescue
       nil # no proper result found
     end
   end
 
   def update_freebase_session
-    session[:results] = ''
-    session[:this_query] = ''
+    session[:freebasequery] = ''
     if params[:freebase]
       if params[:freebase][:query] && params[:freebase][:query]!=""
-      session[:this_query] = params[:freebase][:query]
-      session[:results] = query(session[:this_query].downcase.gsub(/\s/,'_'))
+        session[:freebasequery] = params[:freebase][:query]
       end
     end
   end

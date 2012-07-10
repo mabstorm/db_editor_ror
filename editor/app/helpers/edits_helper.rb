@@ -54,7 +54,17 @@ module EditsHelper
   def update_from_params(edit)
     edit.update_attribute("synsetid", params[:edit][:synsetid])
     edit.update_attribute("definition", params[:edit][:definition])
-    edit.update_attribute("members", deserialize_members(params[:members]))  end
+    edit.update_attribute("members", deserialize_members(params[:members]))
+  end
 
+  def render_wordnet_interface f
+    chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
+    render :file => 'app/views/wn_queries/query.html.haml', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml]
+  end
 
+  def render_freebase_interface f
+    session[:this_query] = nil
+    results = query(session[:freebasequery])
+    render :file => 'app/views/infogetter/query.html.haml', :locals => {:f => f, :freebasequery => session[:freebasequery], :results => results}, :handlers => [:haml]
+  end
 end

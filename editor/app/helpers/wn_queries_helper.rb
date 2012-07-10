@@ -4,10 +4,7 @@
 module WnQueriesHelper
 
   $db = SQLite3::Database.new("db/working_wordnet.db")
-
-
-  def WnQueriesHelper.get_synsetids(word)
-    $db.query("
+  $synsetidquery = $db.prepare("
                  SELECT synsets.synsetid
                    FROM synsets, 
                         senses, 
@@ -17,12 +14,9 @@ module WnQueriesHelper
                         senses.wordid == words.wordid 
                         AND
                         words.lemma LIKE ?
-              ", word).to_a.flatten
-  end
+                   ")
 
-  def WnQueriesHelper.get_members(synsetid)
-    members_and_keys = Hash.new
-    $db.query("
+  $membersquery = $db.prepare("
       SELECT words.lemma, senses.sensekey
         FROM synsets, 
              senses, 
@@ -32,15 +26,25 @@ module WnQueriesHelper
              synsets.synsetid == senses.synsetid 
              AND
              senses.wordid == words.wordid
-             ", synsetid).to_a.each.each {|member, key| members_and_keys[member] = key}
-  end
+             ")
 
-  def WnQueriesHelper.get_definition(synsetid)
-    $db.query("
+  $definitionquery = $db.prepare("
       SELECT synsets.definition
       FROM   synsets
       WHERE  synsetid==?
-      ", synsetid).to_a.flatten.first
+      ")
+
+  def WnQueriesHelper.get_synsetids(word)
+    $synsetidquery.execute(word).to_a.flatten
+  end
+
+  def WnQueriesHelper.get_members(synsetid)
+    members_and_keys = Hash.new
+    $membersquery.execute(synsetid).to_a.each.each {|member, key| members_and_keys[member] = key}
+  end
+
+  def WnQueriesHelper.get_definition(synsetid)
+    $definitionquery.execute(synsetid).to_a.flatten.first
   end
   
   def render_members_and_keys(mak)
@@ -49,6 +53,8 @@ module WnQueriesHelper
 #    Haml::Engine.new(content).render(:locals => {:members_and_keys=>mak})
     render :file => 'app/views/wn_queries/member_key.html.haml', :locals => {:members_and_keys => mak }, :handlers => [:haml]
   end
+
+
 
 end
 
@@ -72,3 +78,40 @@ class Synset
   end
 end
 
+def wordnet_query_session
+  session[:wordnetquery] = params[:wordnet][:query] rescue nil
+  session[:chosen_synsetid] = params[:synsetid] rescue nil
+end
+
+def wordnet_query(wnquery, synsetid)
+  wnresults = SynsetInfo.new(wnquery) rescue nil
+  chosen_synset = Synset.new(synsetid) rescue nil
+  return chosen_synset, wnresults
+end
+
+=begin
+def test_prepare_queries
+  testlist = %w{fish water waterfall miracle get fun wonderful}
+  
+  begin_time = Time.now
+  5.times do |t|
+    results = Array.new
+    testlist.each do |word|
+      results.push(WnQueriesHelper.get_synsetids(word))
+    end
+    puts t
+  end
+  end_time = Time.now
+
+  begin_time2 = Time.now
+  5.times do |t|
+    results = Array.new
+    testlist.each do |word|
+      results.push(WnQueriesHelper.old_get_synsetids(word))
+    end
+    puts t
+  end
+  end_time2 = Time.now
+  puts "new: #{end_time - begin_time}\nold: #{end_time2 - begin_time2}"
+end
+=end

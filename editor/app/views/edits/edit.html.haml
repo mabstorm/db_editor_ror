@@ -1,24 +1,17 @@
 -# edit.html.haml using partial
 
 %body
-
-  = form_tag edit_path(@edit), :id => 'editsform', :method => :put do
+  = form_tag edit_path(@edit), :id => 'editsform', :method => :put do |f|
     #header
       = ''
     #container
       
       .column#center
-        %h1 Make an info query
+        %h1 WordNet Query
+        = render_wordnet_interface f
 
-
-        = label :ig, :query, 'Query'
-        = text_field :freebase, 'query', :value => session[:this_query]
-
-        = submit_tag 'Submit query', :name => 'query'
-        %br
-        = session[:results]
       .column#left
-        %h1 Edit Existing Entry
+        %h1 Make a Change
         = label :edit, :synsetid, 'Synsetid'
         = text_field :edit, 'synsetid', :size => '10'
         %br
@@ -51,9 +44,11 @@
 
 
       .column#right
-        %h1 WordNet Query
+        = render_freebase_interface f
+
+
 
     #footer
-      = ''
+      = debug session
   %br
   %br

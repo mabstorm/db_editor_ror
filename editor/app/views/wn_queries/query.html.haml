@@ -1,23 +1,20 @@
-%h1 Make an info query
 
 = form_tag query_path do
   = label :wn, :query, 'Query'
-  = text_field :wordnet, 'query'
+  = text_field :wordnet, 'query', :value => queryval
 
-  = submit_tag 'Submit query'
+  = submit_tag 'Submit query', :name => 'submit_wordnet_query'
 
 %br
-- if @chosen_synset
-  = render_members_and_keys(@chosen_synset.members_and_keys)
+%br
 
-- if @wnresults
-  = form_tag query_path do
-    - @wnresults.synsets.each do |synset|
-      = label :wn, :synsetid, 'Synsetid: '
-      = submit_tag 'Use', :name => :synsetid, :value => synset.synsetid
-      %br
-      = label :wn, :definition, 'Definition: '
-      = synset.definition
-      = render_members_and_keys(synset.members_and_keys)
-      %br
+- if wnresults
+  - wnresults.synsets.each do |synset|
+    = label :wn, :synsetid, 'Synsetid'
+    = submit_tag 'Use', :name => :synsetid, :value => synset.synsetid
+    %br
+    = label :wn, :definition, 'Definition'
+    = synset.definition
+    = render_members_and_keys(synset.members_and_keys)
+    %br
 

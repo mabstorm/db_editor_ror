@@ -9,7 +9,7 @@ html, body {
   width: 100%;
 }
 body {
-  min-width: 1200px;
+  min-width: 1150px;
 }
 div#main {
   margin: 0;
@@ -82,23 +82,24 @@ form#editsform {
   position: relative;
 }
 #center {
-  width: 100%;
+  width: 360px;
 }
 #left {
-  width: 395px;
-  margin-left: -100%;
+  width: 380px;
+  margin-left: -350px;
   right: 400px;
   padding-left: 5px;
 }
 #right {
-  width: 350px;
-  margin-right: -350px;
+  width: 100%;
+  width: -moz-calc(100% - 100px);
+  margin-right: -400px;
 }
 #footer {
   clear: both;
 }
 #edit_definition, #edit_synsetid {
-  width: 380px;
+  width: 370px;
 }
 label {
   font-weight: bold;

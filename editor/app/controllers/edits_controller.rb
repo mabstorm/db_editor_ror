@@ -44,6 +44,7 @@ class EditsController < ApplicationController
   def edit
     return force_login if !admin?
     @edit = Edit.find_by_id(params[:id])
+
     if @edit.nil?
       params[:edit] = Hash.new
       params[:edit][:synsetid] = 0
@@ -68,10 +69,13 @@ class EditsController < ApplicationController
       message = 'updated'
     end
 
-    update_from_params(@edit)
+    update_from_params(@edit) if message
 
     # searching for something on the side using Freebase
     update_freebase_session
+
+    # update the session based on the wordnet query section
+    wordnet_query_session
 
     #@edit.update_attributes!(params[:edit])
     flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?
