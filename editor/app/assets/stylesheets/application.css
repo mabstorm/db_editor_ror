@@ -56,6 +56,8 @@ table#edits th, table#edits td {
 table#edits th.hilite {
   background-color: yellow;
 }
+table#edits tr:nth-child(odd)    { background-color: white; }
+table#edits tr:nth-child(even)    { background-color: silver; }
 
 #notice #warning {
   background: rosybrown;
@@ -71,6 +73,7 @@ form label {
 form#editsform {
   height: 100%;
 }
+
 #container {
   padding-left: 400px;
   padding-right: 350px;

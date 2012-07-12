@@ -29,6 +29,13 @@ module EditsHelper
     return hash
   end
 
+  def create_blank_edit
+    params[:edit] = Hash.new
+    params[:edit][:synsetid] = 0
+    params[:edit][:definition] = ""
+    create
+  end
+
 
   def add_member_action
     if params[:members].nil?
@@ -52,19 +59,48 @@ module EditsHelper
   end
 
   def update_from_params(edit)
+=begin
     edit.update_attribute("synsetid", params[:edit][:synsetid])
     edit.update_attribute("definition", params[:edit][:definition])
     edit.update_attribute("members", deserialize_members(params[:members]))
+=end
+    edit.update_attributes({"synsetid" => params[:edit][:synsetid],
+                          "definition" => params[:edit][:definition],
+                          "members" => deserialize_members(params[:members])})
+
+  end
+
+  def sort_for_column(column)
+    @sort_by == column && @sort_direction == "ASC" ? "DESC" : "ASC"
+  end
+
+  def is_blank(edit)
+    edit.synsetid==0 && edit.definition == ""
+  end
+
+  def new_from_synset(edit)
+    new_synset = Synset.new(params[:synsetid])
+    if (is_blank edit)
+      edit.update_attributes({"synsetid" => new_synset.synsetid,
+                          "definition" => new_synset.definition,
+                          "members" => new_synset.members_and_keys})
+    else
+      @edit = Edit.create({"synsetid" => new_synset.synsetid,
+                          "definition" => new_synset.definition,
+                          "members" => new_synset.members_and_keys})
+    end
+    flash[:notice] = "#{@edit.synsetid} was successfully imported"
+    redirect_to edit_edit_path(@edit)
   end
 
   def render_wordnet_interface f
     chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
-    render :file => 'app/views/wn_queries/query.html.haml', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml]
+    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml]
   end
 
   def render_freebase_interface f
     session[:this_query] = nil
     results = query(session[:freebasequery])
-    render :file => 'app/views/infogetter/query.html.haml', :locals => {:f => f, :freebasequery => session[:freebasequery], :results => results}, :handlers => [:haml]
+    render :file => 'app/views/infogetter/query', :locals => {:f => f, :freebasequery => session[:freebasequery], :results => results}, :handlers => [:haml]
   end
 end

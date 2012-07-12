@@ -18,6 +18,7 @@ Editor::Application.routes.draw do
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   resources :edits, :sessions
+  match 'edits/:id/edit' => 'edits#edit', :via => [:get, :put] # use for no redirect in editing
   match 'freebase', :to => 'infogetter#query', :as => 'query'
   match 'wordnet', :to => 'wn_queries#query', :as => 'query'
   match 'login', :to => 'sessions#new', :as => 'login'

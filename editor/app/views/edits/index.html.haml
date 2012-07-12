@@ -4,24 +4,23 @@
 %table#edits
   %thead
     %tr
-      %th{:class=>("hilite" if @sort_by=="synsetid")}= link_to "Synsetid", {:sort_by => "synsetid"}, :id => "synsetid_header"
-      %th#definition_header{:class=>("hilite" if @sort_by=="definition")}= link_to "Definition", {:sort_by=> "definition"}, :id => "definition_header"
-      %th#members_header{:class=>("hilite" if @sort_by=="members")}= link_to "Members", {:sort_by=> "members"}, :id => "members_header"
+      %th{:class=>("hilite" if @sort_by=="synsetid")}= link_to "Synsetid", {:sort_by => "synsetid", :sort_direction=>(sort_for_column("synsetid"))}, :id => "synsetid_header"
+      %th#definition_header{:class=>("hilite" if @sort_by=="definition")}= link_to "Definition", {:sort_by=> "definition", :sort_direction=>(sort_for_column("definition"))}, :id => "definition_header"
+      %th#members_header{:class=>("hilite" if @sort_by=="members")}= link_to "Members", {:sort_by=> "members", :sort_direction=>(sort_for_column("members"))}, :id => "members_header"
       %th 
       %th
       %th
+      %th#updated_at_header{:class=>("hilite" if @sort_by=="updated_at")}= link_to "Last Updated", {:sort_by=> "updated_at", :sort_direction=>(sort_for_column("updated_at"))}, :id => "updated_at_header"
   %tbody
     - @all_edits.each do |edit|
       %tr
         %td= edit.synsetid 
         %td= edit.definition
-        %td 
-          -edit.members.each_pair do |member, key|
-            = "#{member}, #{key}"
-            %br
+        %td= edit.members.keys.join(", ")
         %td= link_to "edit", edit_edit_path(edit)
         %td= link_to "view", edit_path(edit)
         %td= button_to "delete", edit, :method=>:delete, :class=>:destroy
+        %td= edit.updated_at
 
 = link_to 'Add new synset', edit_edit_path(0)
 %br

@@ -14,6 +14,8 @@ class EditsController < ApplicationController
   def index
     return force_login if !admin?
     redirect = false
+    session[:wordnetquery] = nil
+    session[:freebasequery] = nil
 
     if params.has_key?(:sort_by)
       @sort_by = params[:sort_by]
@@ -23,10 +25,23 @@ class EditsController < ApplicationController
     else
       @sort_by = ""
     end
+    if params.has_key?(:sort_direction)
+      @sort_direction = params[:sort_direction]
+    elsif session.has_key?(:sort_direction)
+      params.merge!(:sort_direction => session[:sort_direction])
+      redirect = true
+    else
+      @sort_direction = "DESC"
+    end
     (flash.keep; return redirect_to params) if redirect
 
     session[:sort_by] = @sort_by
-    @all_edits = Edit.order(@sort_by)
+    session[:sort_direction] = @sort_direction
+    if @sort_by==:updated_at
+      @all_edits = Edit.order("DATE(#{@sort_by}) #{@sort_direction}")
+    else
+      @all_edits = Edit.order("#{@sort_by} #{@sort_direction}")
+    end
   end
 
   def new
@@ -46,18 +61,23 @@ class EditsController < ApplicationController
     @edit = Edit.find_by_id(params[:id])
 
     if @edit.nil?
-      params[:edit] = Hash.new
-      params[:edit][:synsetid] = 0
-      params[:edit][:definition] = ""
-      create
+      return create_blank_edit
     end
     @message = flash[:notice]
+    
+    update
   end
 
   def update
     return force_login if !admin?
     @edit = Edit.find params[:id]
     message = nil
+
+
+    if (params[:synsetid])
+      new_from_synset @edit
+    end
+
     if (params[:add_member])
       add_member_action
       message = 'added'
@@ -79,7 +99,7 @@ class EditsController < ApplicationController
 
     #@edit.update_attributes!(params[:edit])
     flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?
-    redirect_to edit_edit_path(@edit)
+    #redirect_to edit_edit_path(@edit)
   end
 
   def destroy

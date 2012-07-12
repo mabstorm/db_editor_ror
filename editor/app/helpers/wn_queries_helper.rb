@@ -3,7 +3,12 @@
 # File meant to update the working_wordnet.db
 module WnQueriesHelper
 
-  $db = SQLite3::Database.new("db/working_wordnet.db")
+  if $0 == "irb"
+    $sid = '102512053'
+    $db = SQLite3::Database.new("../../db/working_wordnet.db")
+  else
+    $db = SQLite3::Database.new("db/working_wordnet.db")
+  end
   $synsetidquery = $db.prepare("
                  SELECT synsets.synsetid
                    FROM synsets, 
@@ -30,9 +35,25 @@ module WnQueriesHelper
 
   $definitionquery = $db.prepare("
       SELECT synsets.definition
-      FROM   synsets
-      WHERE  synsetid==?
+        FROM synsets
+       WHERE synsetid==?
       ")
+
+  $semlinksquery = $db.prepare("
+      SELECT link,
+             synset2id
+        FROM semlinks, 
+             linktypes
+       WHERE semlinks.linkid == linktypes.linkid
+             AND
+             synset1id == ?
+      ")
+
+  $posquery = $db.prepare("
+     SELECT synsets.pos
+     FROM synsets
+     WHERE synsetid==?
+     ")
 
   def WnQueriesHelper.get_synsetids(word)
     $synsetidquery.execute(word).to_a.flatten
@@ -41,17 +62,22 @@ module WnQueriesHelper
   def WnQueriesHelper.get_members(synsetid)
     members_and_keys = Hash.new
     $membersquery.execute(synsetid).to_a.each.each {|member, key| members_and_keys[member] = key}
+    return members_and_keys
   end
 
   def WnQueriesHelper.get_definition(synsetid)
     $definitionquery.execute(synsetid).to_a.flatten.first
   end
   
+  def WnQueriesHelper.get_semlinks(synsetid)
+    $semlinksquery.execute(synsetid).to_a
+  end
+  
   def render_members_and_keys(mak)
     return if mak.nil?
 #    content = File.read('app/views/wn_queries/member_key.html.haml')
 #    Haml::Engine.new(content).render(:locals => {:members_and_keys=>mak})
-    render :file => 'app/views/wn_queries/member_key.html.haml', :locals => {:members_and_keys => mak }, :handlers => [:haml]
+    render :file => 'app/views/wn_queries/member_key', :locals => {:members_and_keys => mak }, :handlers => [:haml]
   end
 
 
@@ -69,12 +95,13 @@ class SynsetInfo
 end
 
 class Synset
-  attr_reader :synsetid, :members_and_keys, :definition
+  attr_reader :synsetid, :members_and_keys, :definition, :semlinks
   def initialize(synsetid)
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid
     @members_and_keys = WnQueriesHelper.get_members(synsetid)
     @definition = WnQueriesHelper.get_definition(synsetid)
+    @semlinks = WnQueriesHelper.get_semlinks(synsetid)
   end
 end
 
