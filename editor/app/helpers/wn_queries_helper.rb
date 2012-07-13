@@ -9,8 +9,9 @@ module WnQueriesHelper
   else
     $db = SQLite3::Database.new("db/working_wordnet.db")
   end
-  $synsetidquery = $db.prepare("
-                 SELECT synsets.synsetid
+
+  $synsetidposquery = $db.prepare("
+                 SELECT synsets.synsetid, synsets.pos
                    FROM synsets, 
                         senses, 
                         words
@@ -55,8 +56,24 @@ module WnQueriesHelper
      WHERE synsetid==?
      ")
 
+  $distinctlinksquery = $db.prepare("
+     SELECT DISTINCT link
+                FROM linktypes
+     ")
+  $all_links = $distinctlinksquery.execute.to_a.flatten
+
+  def WnQueriesHelper.get_synsetids_and_pos(word)
+    sids_and_pos = Hash.new
+    $synsetidposquery.execute(word).to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+    return sids_and_pos
+  end
+
+  def WnQueriesHelper.get_pos(synsetid)
+    $posquery.execute(synsetid).to_a.flatten.first
+  end
+
   def WnQueriesHelper.get_synsetids(word)
-    $synsetidquery.execute(word).to_a.flatten
+    get_synsetids_and_pos(word).keys
   end
 
   def WnQueriesHelper.get_members(synsetid)
@@ -90,17 +107,24 @@ class SynsetInfo
     raise ArgumentError, "nil word" if word.nil?
     @word = word
     @synsets = Array.new
-    WnQueriesHelper.get_synsetids(word).each {|synsetid| @synsets.push(Synset.new(synsetid))}
+    WnQueriesHelper.get_synsetids_and_pos(word).each {|synsetid,pos| @synsets.push(Synset.new(synsetid,pos))}
+    # try using the 'word' as a synsetid instead if no results came up
+    if @synsets.empty?
+      @synsets.push(Synset.new(word, WnQueriesHelper.get_pos(word)))
+    end
   end
 end
 
 class Synset
-  attr_reader :synsetid, :members_and_keys, :definition, :semlinks
-  def initialize(synsetid)
+  attr_reader :synsetid, :pos, :members_and_keys, :definition, :semlinks
+  def initialize(synsetid, pos='n')
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid
+    @pos = pos
     @members_and_keys = WnQueriesHelper.get_members(synsetid)
     @definition = WnQueriesHelper.get_definition(synsetid)
+  end
+  def set_semlinks
     @semlinks = WnQueriesHelper.get_semlinks(synsetid)
   end
 end

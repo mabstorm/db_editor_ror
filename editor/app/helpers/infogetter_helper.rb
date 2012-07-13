@@ -12,7 +12,16 @@ module InfogetterHelper
     begin
       JSON.parse(HTTPClient.get_content(query_string(word.downcase.gsub(/\s/,'_'))))["result"]
     rescue
-      nil # no proper result found
+      wikipedia_query(word)
+    end
+  end
+
+  def wikipedia_query(word)
+    # lookup the first 2 paragraphs of wikipedia using the wikipedia-client gem
+    begin
+      Wikipedia.find(word.downcase.gsub(/[^a-z0-9.,]/,' ')).sanitized_content.match(/(<p>.*?<\/p>.*?){2}/m)[0].html_safe
+    rescue
+      "No result found"
     end
   end
 

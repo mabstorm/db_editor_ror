@@ -14,7 +14,7 @@
     = submit_tag 'Use', :name => :synsetid, :value => synset.synsetid
     %br
     = label :wn, :definition, 'Definition'
-    = synset.definition
+    = "(#{synset.pos}) #{synset.definition}"
     = render_members_and_keys(synset.members_and_keys)
     %br
 

@@ -1,4 +1,5 @@
 module EditsHelper
+  include WnQueriesHelper
   def deserialize_members(members)  
     members_info = Hash.new
     if !members.nil?
@@ -97,6 +98,12 @@ module EditsHelper
     chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
     render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml]
   end
+
+  def render_semlinks(f, synsetid)
+    semlinks = WnQueriesHelper.get_semlinks(synsetid)
+    render :file => 'app/views/edits/semlinks', :locals => {:f => f, :semlinks => semlinks, :all_links => $all_links}, :handlers => [:haml]
+  end
+
 
   def render_freebase_interface f
     session[:this_query] = nil

@@ -1,0 +1,9 @@
+%h1 Google Query
+
+
+= label :ig, :query, 'Query'
+= text_field :freebase, 'query', :value => freebasequery
+
+= submit_tag 'Submit query', :name => 'query'
+%br
+= results

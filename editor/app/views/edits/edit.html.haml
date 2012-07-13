@@ -12,13 +12,13 @@
 
       .column#left
         %h1 Make a Change
-        = label :edit, :synsetid, 'Synsetid'
+        = link_to_function 'Synsetid', "$('input#edit_synsetid').toggle()"
         = text_field :edit, 'synsetid', :size => '10'
         %br
-        = label :edit, :definition, 'Definition'
+        = link_to_function 'Definition', "$('textarea#edit_definition').toggle()"
         = text_area :edit, 'definition', :size => '10x8'
         %br
-        = label :edit, :members, 'Members'
+        = link_to_function 'Members', "$('table#members').toggle()"
         %br
         %table#members
           %thead
@@ -32,15 +32,20 @@
                 %td= check_box :check_box, 'delete_'+member
                 %td= text_field :members, 'old_'+member, 'value' => member, :size=>'10'
                 %td= text_field :members, ('old_'+member+'|'+'old_'+key), 'value' => key, :size=>15
+        = @message
         %br
         = submit_tag 'Update Info', :name => 'update_members'
         = submit_tag 'Add member', :name => 'add_member'
         = submit_tag 'Delete checked', :name => 'delete_members'
 
         %br
-        = @message
-        %br
         = link_to 'Return to list', edits_path
+        %br
+        %br
+        = render_semlinks f, @edit.synsetid
+
+        %br
+
 
 
       .column#right

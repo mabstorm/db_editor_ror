@@ -1,0 +1,15 @@
+= link_to_function 'Semantic Links', "$('#semlinks').toggle()"
+
+#semlinks
+  %table#semlinks
+    %thead
+      %tr  
+        %th
+        %th= 'Relationship'
+        %th= 'Synset2id'
+    %tbody
+      - semlinks.each do |link, synset2id|
+        %tr
+          %td= check_box :check_box, "delete_#{link}_#{synset2id}"
+          %td= select :link, "other", all_links, :selected => link, 'value' => link
+          %td= text_field :members, ("old_#{link}|old_#{synset2id}"), 'value' => synset2id, :size=>8
