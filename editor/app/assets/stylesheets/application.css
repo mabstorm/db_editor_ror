@@ -41,7 +41,7 @@ h1.title {
 table#edits {
   margin: 10px;
   border-collapse: collapse;
-  width: 100%;
+  width: 98%;
   border-bottom: 2px solid black;
 }
 table#edits th {
@@ -101,8 +101,11 @@ form#editsform {
 #footer {
   clear: both;
 }
-#edit_definition, #edit_synsetid {
+#edit_definition {
   width: 370px;
+}
+#edit_synsetid, #edit_pos {
+  width: 180px;
 }
 label {
   font-weight: bold;

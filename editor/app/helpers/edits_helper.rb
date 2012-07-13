@@ -34,6 +34,7 @@ module EditsHelper
     params[:edit] = Hash.new
     params[:edit][:synsetid] = 0
     params[:edit][:definition] = ""
+    params[:edit][:pos] = "n"
     create
   end
 
@@ -67,6 +68,7 @@ module EditsHelper
 =end
     edit.update_attributes({"synsetid" => params[:edit][:synsetid],
                           "definition" => params[:edit][:definition],
+                          "pos" => params[:edit][:pos],
                           "members" => deserialize_members(params[:members])})
 
   end
@@ -84,10 +86,12 @@ module EditsHelper
     if (is_blank edit)
       edit.update_attributes({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
+                          "pos" => new_synset.pos,
                           "members" => new_synset.members_and_keys})
     else
       @edit = Edit.create({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
+                          "pos" => new_synset.pos,
                           "members" => new_synset.members_and_keys})
     end
     flash[:notice] = "#{@edit.synsetid} was successfully imported"
@@ -96,7 +100,7 @@ module EditsHelper
 
   def render_wordnet_interface f
     chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
-    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml]
+    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml] 
   end
 
   def render_semlinks(f, synsetid)

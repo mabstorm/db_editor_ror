@@ -10,6 +10,9 @@
 
 - if wnresults
   - wnresults.synsets.each do |synset|
+    - if synset.pos.nil? && synset.definition.nil?
+      = "No result found"
+      - next
     = label :wn, :synsetid, 'Synsetid'
     = submit_tag 'Use', :name => :synsetid, :value => synset.synsetid
     %br

@@ -12,8 +12,14 @@
 
       .column#left
         %h1 Make a Change
-        = link_to_function 'Synsetid', "$('input#edit_synsetid').toggle()"
-        = text_field :edit, 'synsetid', :size => '10'
+        %table#basicinfo
+          %tbody
+            %tr
+              %td= link_to_function 'Synsetid', "$('input#edit_synsetid').toggle()"
+              %td= link_to_function 'Part of Speech', "$('input#edit_pos').toggle()"
+            %tr
+              %td= text_field :edit, 'synsetid', :size => '5'
+              %td= text_field :edit, 'pos', :size => '5'
         %br
         = link_to_function 'Definition', "$('textarea#edit_definition').toggle()"
         = text_area :edit, 'definition', :size => '10x8'
@@ -54,6 +60,7 @@
 
 
     #footer
+      = debug params
       = debug session
   %br
   %br

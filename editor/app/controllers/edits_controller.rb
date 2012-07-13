@@ -23,7 +23,7 @@ class EditsController < ApplicationController
       params.merge!(:sort_by => session[:sort_by])
       redirect = true
     else
-      @sort_by = ""
+      @sort_by = "updated_at"
     end
     if params.has_key?(:sort_direction)
       @sort_direction = params[:sort_direction]
@@ -50,7 +50,7 @@ class EditsController < ApplicationController
 
   def create
     return force_login if !admin?
-    @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition]})
+    @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition],"pos"=>params[:edit][:pos]})
     @edit.update_attribute("members", deserialize_members(params[:members]))
     flash[:notice] = "#{@edit.synsetid} was successfully created."
     redirect_to edit_edit_path(@edit)

@@ -117,9 +117,10 @@ end
 
 class Synset
   attr_reader :synsetid, :pos, :members_and_keys, :definition, :semlinks
-  def initialize(synsetid, pos='n')
+  def initialize(synsetid, pos=nil)
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid
+    pos = WnQueriesHelper.get_pos(synsetid) if pos.nil?
     @pos = pos
     @members_and_keys = WnQueriesHelper.get_members(synsetid)
     @definition = WnQueriesHelper.get_definition(synsetid)
