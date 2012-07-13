@@ -60,7 +60,14 @@ module WnQueriesHelper
      SELECT DISTINCT link
                 FROM linktypes
      ")
+  
+  $posmaplinksquery = $db.prepare("
+     SELECT * FROM postypes
+     ")
+
+  # GLOBAL CONSTANTS DERIVED FROM WORDNET
   $all_links = $distinctlinksquery.execute.to_a.flatten
+  $pos_map = $posmaplinksquery.execute.to_a.each.map {|initial, fullword| initial}
 
   def WnQueriesHelper.get_synsetids_and_pos(word)
     sids_and_pos = Hash.new
@@ -116,7 +123,7 @@ class SynsetInfo
 end
 
 class Synset
-  attr_reader :synsetid, :pos, :members_and_keys, :definition, :semlinks
+  attr_accessor :synsetid, :pos, :members_and_keys, :definition, :semlinks
   def initialize(synsetid, pos=nil)
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid

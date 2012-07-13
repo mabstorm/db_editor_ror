@@ -16,7 +16,10 @@ module EditsHelper
     members_hash = Hash.new
     members_info.each_pair do |old_name, new_arr|
       next if new_arr[0].nil?
-      new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%1:18:00::" if (new_arr[1].to_s=="" && new_arr[0]!="")
+      if (new_arr[1].to_s=="" && new_arr[0]!="")
+        pos = $pos_map.index(params[:edit][:pos])+1 rescue 1 #default to noun
+        new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%1:18:00::"
+      end
       members_hash[new_arr[0].to_s] = new_arr[1].to_s
     end
     members_hash = {""=>""} if members_hash.empty?
@@ -83,17 +86,21 @@ module EditsHelper
 
   def new_from_synset(edit)
     new_synset = Synset.new(params[:synsetid])
+    new_synset.set_semlinks
     if (is_blank edit)
       edit.update_attributes({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
-                          "members" => new_synset.members_and_keys})
+                          "members" => new_synset.members_and_keys,
+                          "semlinks" => new_synset.semlinks})
     else
       @edit = Edit.create({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
-                          "members" => new_synset.members_and_keys})
+                          "members" => new_synset.members_and_keys,
+                          "semlinks" => new_synset.semlinks})
     end
+    debugger
     flash[:notice] = "#{@edit.synsetid} was successfully imported"
     redirect_to edit_edit_path(@edit)
   end

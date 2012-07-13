@@ -1,7 +1,7 @@
 class Edit < ActiveRecord::Base
   attr_accessible :definition, :synsetid, :members, :semlinks, :pos
   serialize :members, Hash
-  serialize :semlinks, Hash
+  serialize :semlinks, Array
 
 protected
   def members_check
