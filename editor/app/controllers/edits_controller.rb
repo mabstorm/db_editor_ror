@@ -52,6 +52,7 @@ class EditsController < ApplicationController
     return force_login if !admin?
     @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition],"pos"=>params[:edit][:pos]})
     @edit.update_attribute("members", deserialize_members(params[:members]))
+    @edit.update_attribute("semlinks", deserialize_semlinks(params[:semlinks]))
     flash[:notice] = "#{@edit.synsetid} was successfully created."
     redirect_to edit_edit_path(@edit)
   end

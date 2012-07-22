@@ -1,5 +1,6 @@
 module EditsHelper
   include WnQueriesHelper
+  # reset the entire members hash using the params
   def deserialize_members(members)  
     members_info = Hash.new
     if !members.nil?
@@ -27,7 +28,22 @@ module EditsHelper
   end
 
 
+  # resets the entire semlinks array of pairs
+  def deserialize_semlinks(semlinks)
+    links = Hash.new
+    semlinks.each_pair do |passed_name, value|
+      name = passed_name.gsub('_', '|')
+      links[name] = Array.new if links[name].nil?
+      # setting synset2id
+      links[name][1] = value if passed_name.include? '|'
+      # setting linktype
+      links[name][0] = value if passed_name.include? '_'
+    end
+    return links.values
+  end
 
+
+  # remove empty members
   def clean_hash(hash)
     hash.delete_if {|k,v| k==""||v==""}
     return hash
@@ -72,6 +88,7 @@ module EditsHelper
     edit.update_attributes({"synsetid" => params[:edit][:synsetid],
                           "definition" => params[:edit][:definition],
                           "pos" => params[:edit][:pos],
+                          "semlinks" => deserialize_semlinks(params[:semlinks]),
                           "members" => deserialize_members(params[:members])})
 
   end
@@ -110,8 +127,12 @@ module EditsHelper
     render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml] 
   end
 
-  def render_semlinks(f, synsetid)
-    semlinks = WnQueriesHelper.get_semlinks(synsetid)
+  def render_semlinks(f, synsetid, edit)
+    if edit.semlinks.nil?
+      semlinks = WnQueriesHelper.get_semlinks(synsetid)
+    else
+      semlinks = edit.semlinks
+    end
     render :file => 'app/views/edits/semlinks', :locals => {:f => f, :semlinks => semlinks, :all_links => $all_links}, :handlers => [:haml]
   end
 

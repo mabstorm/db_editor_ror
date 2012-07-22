@@ -11,5 +11,5 @@
       - semlinks.each do |link, synset2id|
         %tr
           %td= check_box :check_box, "delete_#{link}_#{synset2id}"
-          %td= select :link, "other", all_links, :selected => link, 'value' => link
-          %td= text_field :members, ("old_#{link}|old_#{synset2id}"), 'value' => synset2id, :size=>8
+          %td= select :semlinks, "#{link}_#{synset2id}", all_links, :selected => link, 'value' => link
+          %td= text_field :semlinks, ("#{link}|#{synset2id}"), 'value' => synset2id, :size=>8
