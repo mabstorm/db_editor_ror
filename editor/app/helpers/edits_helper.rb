@@ -30,6 +30,7 @@ module EditsHelper
 
   # resets the entire semlinks array of pairs
   def deserialize_semlinks(semlinks)
+    return [] if semlinks.nil?
     links = Hash.new
     semlinks.each_pair do |passed_name, value|
       name = passed_name.gsub('_', '|')
@@ -69,9 +70,18 @@ module EditsHelper
   def delete_member_action
     params[:check_box].each_pair do |mem,to_del|
       if (to_del=="1")
-        params[:members].delete("old_#{mem.gsub('delete_','')}") 
+        to_delete = "#{mem.gsub('delete_','')}"
+        params[:members].delete("old_#{to_delete}") 
       end
     end
+    params[:semlinks_check_box].each_pair do |mem,to_del|
+      if (to_del=="1")
+        to_delete = "#{mem.gsub('delete_','')}"
+        params[:semlinks].delete(to_delete)
+        params[:semlinks].delete(to_delete.gsub('_','|'))
+      end
+    end
+
     params[:members] = clean_hash(params[:members])
   end
 
@@ -117,7 +127,6 @@ module EditsHelper
                           "members" => new_synset.members_and_keys,
                           "semlinks" => new_synset.semlinks})
     end
-    debugger
     flash[:notice] = "#{@edit.synsetid} was successfully imported"
     redirect_to edit_edit_path(@edit)
   end
