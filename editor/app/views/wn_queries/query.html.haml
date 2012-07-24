@@ -14,7 +14,10 @@
       = "No result found"
       - next
     = label :wn, :synsetid, 'Synsetid'
-    = submit_tag 'Use', :name => :synsetid, :value => synset.synsetid
+    = synset.synsetid
+    %br
+    = button_tag 'Edit', :name => :synsetid, :value => synset.synsetid
+    = button_tag 'Semlink', :name => :create_semlink, :value => synset.synsetid
     %br
     = label :wn, :definition, 'Definition'
     = "(#{synset.pos}) #{synset.definition}"

@@ -88,6 +88,8 @@ class EditsController < ApplicationController
     elsif (params[:update_members])
       update_members_action
       message = 'updated'
+    elsif (params[:create_semlink])
+      message = 'add semlink'
     end
 
     update_from_params(@edit) if message
