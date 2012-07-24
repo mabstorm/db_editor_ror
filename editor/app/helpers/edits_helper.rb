@@ -34,6 +34,7 @@ module EditsHelper
     unless semlinks.nil?
       semlinks.each_pair do |passed_name, value|
         name = passed_name.gsub('_', '|')
+        next if name.empty?
         links[name] = Array.new if links[name].nil?
         # setting synset2id
         links[name][1] = value if passed_name.include? '|' # synset2id
@@ -41,12 +42,20 @@ module EditsHelper
         links[name][0] = value if passed_name.include? '_' # linktype
       end
     end
+    # check to see if all links had a matching set
+    links.each_pair do |name, semlink|
+      links.delete(name) if (semlink.nil? || semlink[0].nil? || semlink[1].nil? || semlink[0].empty? || semlink[1].empty?)
+    end
+
     if params[:create_semlink]
       name = "___" # temp name...
       links[name] = Array.new
       links[name][1] = params[:create_semlink]
       links[name][0] = "hypernym"
+      params[:create_semlink] = nil
     end
+    params[:semlinks] = links.values
+    puts "*****************#{links.values}***************"
     return links.values
   end
 
@@ -145,8 +154,10 @@ module EditsHelper
 
   def render_semlinks(f, synsetid, edit)
     if edit.semlinks.nil?
+      puts "+++++++++++finding new semlinks+++++++++++"
       semlinks = WnQueriesHelper.get_semlinks(synsetid)
     else
+      puts "++USING OLD SEMLINKS++"
       semlinks = edit.semlinks
     end
     render :file => 'app/views/edits/semlinks', :locals => {:f => f, :semlinks => semlinks, :all_links => $all_links}, :handlers => [:haml]

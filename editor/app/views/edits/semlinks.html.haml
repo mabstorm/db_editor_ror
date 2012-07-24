@@ -12,4 +12,6 @@
         %tr
           %td= check_box :semlinks_check_box, "delete_#{link}_#{synset2id}"
           %td= select :semlinks, "#{link}_#{synset2id}", all_links, :selected => link, 'value' => link
-          %td= button_tag synset2id, :name => "semlinks[#{link}|#{synset2id}", :id => "#{link}|#{synset2id}", 'value' => synset2id, :size=>8
+          -# = hidden_field_tag "#{link}|#{synset2id}", :id => "#{link}|#{synset2id}", 'value' => synset2id
+          -# %td= button_tag synset2id, :name => "semlinks[#{link}|#{synset2id}]", :id => "#{link}|#{synset2id}", 'value' => synset2id, :size=>8
+          %td= text_field :semlinks, ("#{link}|#{synset2id}]"), 'value' => synset2id, :size=>8
