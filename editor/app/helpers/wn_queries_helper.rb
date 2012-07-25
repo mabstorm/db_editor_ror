@@ -5,9 +5,9 @@ module WnQueriesHelper
 
   if $0 == "irb"
     $sid = '102512053'
-    $db = SQLite3::Database.new("../../db/working_wordnet.db")
+    $db = SQLite3::Database.new("../../db/wordnet_3.1+.db")
   else
-    $db = SQLite3::Database.new("db/working_wordnet.db")
+    $db = SQLite3::Database.new("db/wordnet_3.1+.db")
   end
 
   $synsetidposquery = $db.prepare("
