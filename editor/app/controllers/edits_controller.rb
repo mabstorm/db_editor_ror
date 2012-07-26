@@ -69,6 +69,7 @@ class EditsController < ApplicationController
     update
   end
 
+  # always gets called by edit
   def update
     return force_login if !admin?
     @edit = Edit.find params[:id]
@@ -90,6 +91,11 @@ class EditsController < ApplicationController
       message = 'updated'
     elsif (params[:create_semlink])
       message = 'add semlink'
+    end
+
+    if (params[:search_this_synsetid])
+      session[:wordnetquery] = params[:search_this_synsetid]
+      params[:wordnet][:query] = params[:search_this_synsetid]
     end
 
     update_from_params(@edit) if message

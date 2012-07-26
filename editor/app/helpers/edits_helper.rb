@@ -32,14 +32,14 @@ module EditsHelper
   def deserialize_semlinks(semlinks)
     links = Hash.new
     unless semlinks.nil?
-      semlinks.each_pair do |passed_name, value|
-        name = passed_name.gsub('_', '|')
-        next if name.empty?
-        links[name] = Array.new if links[name].nil?
+      semlinks.each_pair do |old_link_and_synset2id, selected_link|
+        l_and_s = old_link_and_synset2id.split('_') rescue next
+        next if l_and_s.empty?
+        links[l_and_s] = Array.new if links[l_and_s].nil?
         # setting synset2id
-        links[name][1] = value if passed_name.include? '|' # synset2id
+        links[l_and_s][1] = l_and_s[1]
         # setting linktype
-        links[name][0] = value if passed_name.include? '_' # linktype
+        links[l_and_s][0] = selected_link
       end
     end
     # check to see if all links had a matching set
@@ -55,7 +55,6 @@ module EditsHelper
       params[:create_semlink] = nil
     end
     params[:semlinks] = links.values
-    puts "*****************#{links.values}***************"
     return links.values
   end
 
