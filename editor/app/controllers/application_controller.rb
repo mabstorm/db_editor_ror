@@ -4,7 +4,6 @@ class ApplicationController < ActionController::Base
 
   def admin?
     session[:username] == 'workingprogress' && session[:password] == 'simplepass1'
-    return true
   end
 
 end
