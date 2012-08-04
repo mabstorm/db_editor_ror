@@ -1,0 +1,17 @@
+= link_to_function 'Lexical Links', "$('#lexlinks').toggle()"
+
+#lexlinks
+  %table#lexlinks
+    %thead
+      %tr  
+        %th
+        %th= 'Sense 1'
+        %th= 'Relationship'
+        %th= 'Sense 2'
+    %tbody
+      - lexlinks.each do |sensekey1, link, sensekey2|
+        %tr
+          %td= check_box :lexlinks_check_box, "delete_#{sensekey1}_#{link}_#{sensekey2}"
+          %td= button_tag sensekey1, :name => 'search_this_sensekey', 'value' => sensekey1, :size=>8
+          %td= select :lexlinks, "#{sensekey1}_#{link}_#{sensekey2}", all_lexlinks, :selected => link, 'value' => link
+          %td= button_tag sensekey2, :name => 'search_this_sensekey', 'value' => sensekey2, :size=>8
