@@ -11,7 +11,7 @@
       - semlinks.each do |link, synset2id|
         %tr
           %td= check_box :semlinks_check_box, "delete_#{link}_#{synset2id}"
-          %td= select :semlinks, "#{link}_#{synset2id}", all_links, :selected => link, 'value' => link
+          %td= select :semlinks, "#{link}_#{synset2id}", all_semlinks, :selected => link, 'value' => link
           -# = hidden_field_tag "#{link}|#{synset2id}", :id => "#{link}|#{synset2id}", 'value' => synset2id
           %td= button_tag synset2id, :name => 'search_this_synsetid', 'value' => synset2id, :size=>8
           -#%td= text_field :semlinks, ("#{link}|#{synset2id}]"), 'value' => synset2id, :size=>8

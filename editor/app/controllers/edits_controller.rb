@@ -1,5 +1,5 @@
 class EditsController < ApplicationController
-  include EditsHelper, InfogetterHelper
+  include EditsHelper, InfogetterHelper, WnQueriesHelper
   def show
     return force_login if !admin?
     id = params[:id] # retrieve edit ID from URI route
@@ -82,15 +82,17 @@ class EditsController < ApplicationController
 
     if (params[:add_member])
       add_member_action
-      message = 'added'
+      message = 'added member'
     elsif (params[:delete_members])
       delete_member_action
-      message = 'deleted'
+      message = 'deleted member'
     elsif (params[:update_members])
       update_members_action
-      message = 'updated'
+      message = 'updated member'
     elsif (params[:create_semlink])
-      message = 'add semlink'
+      message = 'added semlink'
+    elsif (params[:create_lexlink])
+      message = 'added lexlink'
     end
 
     if (params[:search_this_synsetid])
@@ -107,8 +109,22 @@ class EditsController < ApplicationController
     wordnet_query_session
 
     #@edit.update_attributes!(params[:edit])
-    flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?
+    flash[:notice] = "#{message}." if !message.nil?
     #redirect_to edit_edit_path(@edit)
+  end
+
+  def apply
+    return force_login if !admin?
+    @edit = Edit.find(params[:id])
+    WnQueriesHelper.apply_edit_to_database(@edit)
+    #flash[:notice] = ": ##{@edit.id} applied to database successfully"
+    redirect_to edits_path
+  end
+
+  def apply_all
+    Edit.all.each {|edit| WnQueriesHelper.apply_edit_to_database(edit) }
+    flash[:notice] = "applied to database successfully"
+    redirect_to edits_path
   end
 
   def destroy

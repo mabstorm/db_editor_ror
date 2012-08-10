@@ -18,7 +18,7 @@
               %td= link_to_function 'Synsetid', "$('input#edit_synsetid').toggle()"
               %td= link_to_function 'Part of Speech', "$('input#edit_pos').toggle()"
             %tr
-              %td= text_field :edit, 'synsetid', :size => '5'
+              %td= text_field :edit, 'synsetid', :size => '5', :readonly => 'readonly'
               %td= text_field :edit, 'pos', :size => '5'
         %br
         = link_to_function 'Definition', "$('textarea#edit_definition').toggle()"
@@ -48,7 +48,9 @@
         = link_to 'Return to list', edits_path
         %br
         %br
-        = render_semlinks f, @edit.synsetid, @edit
+        = render_semlinks f, @edit
+        %br
+        = render_lexlinks f, @edit
 
         %br
 
