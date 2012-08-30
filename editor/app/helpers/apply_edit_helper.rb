@@ -1,4 +1,12 @@
 module ApplyEditHelper
+  if $db.nil?
+    if $0 == "irb" # assume we enter irb for testing from the main folder
+      $sid = '102512053' 
+      $db = SQLite3::Database.new("../../db/wordnet_3.1+.db")
+    else
+      $db = SQLite3::Database.new("db/wordnet_3.1+.db")
+    end
+  end
   $update_synset_query = $db.prepare("
     UPDATE synsets
        SET pos=?,
