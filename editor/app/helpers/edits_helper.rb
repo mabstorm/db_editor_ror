@@ -107,6 +107,7 @@ module EditsHelper
     params[:edit][:synsetid] = 0
     params[:edit][:definition] = ""
     params[:edit][:pos] = "n"
+    params[:edit][:lexdomainid] = nil
     create
   end
 
@@ -157,6 +158,7 @@ module EditsHelper
     edit.update_attributes({"synsetid" => params[:edit][:synsetid],
                           "definition" => params[:edit][:definition],
                           "pos" => params[:edit][:pos],
+                          "lexdomainid" => params[:edit][:lexdomainid],
                           "semlinks" => deserialize_semlinks(params[:semlinks]),
                           "lexlinks" => deserialize_lexlinks(params[:lexlinks]),
                           "members" => deserialize_members(params[:members])})
@@ -175,10 +177,12 @@ module EditsHelper
     new_synset = Synset.new(params[:synsetid])
     new_synset.set_semlinks
     new_synset.set_lexlinks
+    new_synset.set_lexdomainid
     if (is_blank edit)
       edit.update_attributes({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
+                          "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
                           "lexlinks" => new_synset.lexlinks,
                           "semlinks" => new_synset.semlinks})
@@ -186,6 +190,7 @@ module EditsHelper
       @edit = Edit.create({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
+                          "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
                           "lexlinks" => new_synset.lexlinks,
                           "semlinks" => new_synset.semlinks})
@@ -199,8 +204,18 @@ module EditsHelper
     render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery], :queryval_pos => session[:wordnetquerypos], :query_exact => session[:wordnetqueryexact] }, :handlers => [:haml] 
   end
 
+  def update_lexdomainid(edit)
+    if (edit.lexdomainid.nil?)
+      lexdomainid = WnQueriesHelper.get_lexdomainid(edit.synsetid)
+      edit.update_attribute(:lexdomainid, lexdomainid)
+    end
+  end
+
   def render_semlinks(f, edit)
     synsetid = edit.synsetid
+
+    update_lexdomainid(edit)
+
     if (edit.semlinks.nil? || edit.semlinks.empty?)
       semlinks = WnQueriesHelper.get_semlinks(synsetid)
       edit.update_attribute(:semlinks, semlinks)

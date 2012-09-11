@@ -102,15 +102,15 @@ module WnQueriesHelper
       select senseid1,
              linkid,
              senseid2
-        from lexlinks_new, 
+        from lexlinks, 
              senses
        where senses.synsetid == ?    
              and
-             lexlinks_new.senseid1==senses.senseid
+             lexlinks.senseid1==senses.senseid
              or
              senses.synsetid == ?
              and
-             lexlinks_new.senseid2==senses.senseid
+             lexlinks.senseid2==senses.senseid
       ")
 
   $sensekeyfromsenseid = $db.prepare("
@@ -151,10 +151,18 @@ module WnQueriesHelper
   $senseidtosensekey = $db.prepare("
      SELECT sensekey FROM senses WHERE senseid==?
      ")
-
+  $sensekeytosenseid = $db.prepare("
+     SELECT senseid FROM senses WHERE sensekey==?
+     ")
   $sensekeytowordid = $db.prepare("
      SELECT wordid FROM senses WHERE sensekey==?
      ")
+
+  $get_lexdomainid_query = $db.prepare("
+    SELECT lexdomainid
+      FROM synsets
+     WHERE synsetid==?
+    ")
 
   # GLOBAL CONSTANTS DERIVED FROM WORDNET
   $all_semlinks = $distinctsemlinksquery.execute.to_a.flatten
@@ -206,6 +214,9 @@ module WnQueriesHelper
   def WnQueriesHelper.get_lexlinks(synsetid)
     $lexlinksquery.execute(synsetid,synsetid).to_a.each.map {|k1,linkid,k2| [k1,$links_map[linkid],k2]}
   end
+  def WnQueriesHelper.get_lexdomainid(synsetid)
+    $get_lexdomainid_query.execute(synsetid).to_a.first.first rescue 99
+  end
   def WnQueriesHelper.get_lexlinkskeys(synsetid)
     get_lexlinks(synsetid).map {|k1,link,k2| [senseid_to_sensekey(k1),link,senseid_to_sensekey(k2)] }
   end
@@ -219,7 +230,9 @@ module WnQueriesHelper
   def WnQueriesHelper.senseid_to_sensekey(senseid)
     $senseidtosensekey.execute(senseid).to_a.flatten.first
   end
-  
+  def WnQueriesHelper.sensekey_to_senseid(sensekey)
+    $sensekeytosenseid.execute(sensekey).to_a.flatten.first
+  end 
   def render_members_and_keys(mak)
     return if mak.nil?
 #    content = File.read('app/views/wn_queries/member_key.html.haml')
@@ -261,7 +274,7 @@ class SynsetInfo
 end
 
 class Synset
-  attr_accessor :synsetid, :pos, :members_and_keys, :definition, :semlinks, :lexlinks
+  attr_accessor :synsetid, :pos, :members_and_keys, :definition, :semlinks, :lexlinks, :lexdomainid
   def initialize(synsetid, pos=nil)
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid
@@ -275,6 +288,9 @@ class Synset
   end
   def set_lexlinks
     @lexlinks = WnQueriesHelper.get_lexlinkskeys(synsetid)
+  end
+  def set_lexdomainid
+    @lexdomainid = WnQueriesHelper.get_lexdomainid(synsetid)
   end
 end
 

@@ -24,15 +24,20 @@ module ApplyEditHelper
       FROM synsets
      WHERE synsetid==?
     ")
+  $sensekeytosenseid = $db.prepare("
+    SELECT senseid FROM senses WHERE sensekey==?
+  ")
   def ApplyEditHelper.new_synsetid
     $db.query("SELECT max(synsetid) FROM senses").to_a.first.first + 1
   end
-
+  def ApplyEditHelper.sensekey_to_senseid(sensekey)
+    $sensekeytosenseid.execute(sensekey).to_a.flatten.first
+  end 
 
   # columns:
   # id, synsetid, pos, lexdomain, definition
   def ApplyEditHelper.update_synset(edit)
-    if not edit.respond_to? :lexdomainid
+    if (!edit.respond_to?(:lexdomainid) || edit.lexdomainid.nil?)
       lexdomainid = $get_lexdomainid_query.execute(edit.synsetid).to_a.first.first rescue 99
     else
       lexdomainid = edit.lexdomainid
@@ -223,7 +228,7 @@ module ApplyEditHelper
     $contains_semlink_query.execute(sid1,rel_id,sid2).to_a.length > 0
   end
 
-  def ApplyEditHelper.add_link(sid1, rel_id, sid2)
+  def ApplyEditHelper.add_semlink(sid1, rel_id, sid2)
     $add_semlink_query.execute(sid1, sid2, rel_id)
   end
 
@@ -235,9 +240,42 @@ module ApplyEditHelper
       if ApplyEditHelper.contains_semlink?(edit.synsetid, rel_id, synset2id)
         next
       else
-        ApplyEditHelper.add_link(edit.synsetid, rel_id, synset2id)
+        ApplyEditHelper.add_semlink(edit.synsetid, rel_id, synset2id)
       end
     end
+  end
 
+
+  $contains_lexlink_query = $db.prepare("
+    SELECT * FROM lexlinks
+    WHERE senseid1==?
+      AND linkid==?
+      AND senseid2==?
+    ")
+   $add_lexlink_query = $db.prepare("
+    INSERT INTO lexlinks VALUES(?,?,?)
+    ")
+
+
+  def ApplyEditHelper.contains_lexlink?(key1, rel, key2)
+    $contains_lexlink_query.execute(key1, rel, key2).to_a.length > 0
+  end
+
+  def ApplyEditHelper.add_lexlink(key1, rel, key2)
+    senseid1 = ApplyEditHelper.sensekeytosenseid(key1)
+    senseid2 = ApplyEditHelper.sensekeytosenseid(key2)
+    $add_lexlink_query.execute(senseid1, senseid2, rel)
+  end
+
+  def ApplyEditHelper.update_lexlinks(edit)
+
+    edit.lexlinks.each do |key1, relationship, key2|
+      rel_id = $reverse_links_map[relationship]
+      if ApplyEditHelper.contains_semlink?(key1, rel_id, key2)
+        next
+      else
+        ApplyEditHelper.add_lexlink(key1, rel_id, key2)
+      end
+    end
   end
 end

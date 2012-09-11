@@ -53,6 +53,7 @@ class EditsController < ApplicationController
     @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition],"pos"=>params[:edit][:pos]})
     @edit.update_attribute("members", deserialize_members(params[:members]))
     @edit.update_attribute("semlinks", deserialize_semlinks(params[:semlinks]))
+    update_lexdomainid(@edit)
     flash[:notice] = "#{@edit.synsetid} was successfully created."
     redirect_to edit_edit_path(@edit)
   end
@@ -95,12 +96,13 @@ class EditsController < ApplicationController
       message = 'added lexlink'
     end
 
-    if (params[:search_this_synsetid])
-      session[:wordnetquery] = params[:search_this_synsetid]
-      params[:wordnet][:query] = params[:search_this_synsetid]
+    if (params[:search_this])
+      session[:wordnetquery] = params[:search_this]
+      params[:wordnet][:query] = params[:search_this]
     end
 
     update_from_params(@edit) if message
+    update_lexdomainid(@edit)
 
     # searching for something on the side using Freebase
     update_freebase_session

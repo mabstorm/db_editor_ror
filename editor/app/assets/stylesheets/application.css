@@ -104,6 +104,9 @@ form#editsform {
 #edit_definition {
   width: 370px;
 }
+#edit_lexdomainid {
+  width: 300px;
+}
 #edit_synsetid, #edit_pos {
   width: 180px;
 }

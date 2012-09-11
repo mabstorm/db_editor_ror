@@ -21,6 +21,10 @@
               %td= text_field :edit, 'synsetid', :size => '5', :readonly => 'readonly'
               %td= text_field :edit, 'pos', :size => '5'
         %br
+        = link_to_function 'Lex Domainid', "$('textarea#edit_lexdomainid').toggle()"
+        %br
+        = text_field :edit, 'lexdomainid', :size => '5'
+        %br
         = link_to_function 'Definition', "$('textarea#edit_definition').toggle()"
         = text_area :edit, 'definition', :size => '10x8'
         %br
