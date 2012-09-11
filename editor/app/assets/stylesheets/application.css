@@ -107,6 +107,12 @@ form#editsform {
 #edit_synsetid, #edit_pos {
   width: 180px;
 }
+#wordnet_query {
+  width: 200px;
+}
+#wordnet_pos {
+  width: 150px;
+}
 label {
   font-weight: bold;
 }

@@ -21,9 +21,55 @@ module WnQueriesHelper
                         AND
                         senses.wordid == words.wordid 
                         AND
-                        words.lemma LIKE ?
+                        (words.lemma LIKE ?
+                                          OR
+                         words.lemma LIKE ?
+                                          OR
+                         words.lemma LIKE ?)
                    ")
+  $synsetidposquerywithpos = $db.prepare("
+                 SELECT synsets.synsetid, synsets.pos
+                   FROM synsets, 
+                        senses, 
+                        words
+                  WHERE synsets.synsetid == senses.synsetid 
+                        AND
+                        senses.wordid == words.wordid 
+                        AND
+                        synsets.pos == ?
+                        AND
+                        (words.lemma LIKE ?
+                                          OR
+                         words.lemma LIKE ?
+                                          OR
+                         words.lemma LIKE ?)
+                   ")
+  $synsetidposqueryexact = $db.prepare("
+                 SELECT synsets.synsetid, synsets.pos
+                   FROM synsets, 
+                        senses, 
+                        words
+                  WHERE synsets.synsetid == senses.synsetid 
+                        AND
+                        senses.wordid == words.wordid 
+                        AND
+                        words.lemma LIKE ?
+  
+                   ")
+  $synsetidposquerywithposexact = $db.prepare("
+                 SELECT synsets.synsetid, synsets.pos
+                   FROM synsets, 
+                        senses, 
+                        words
+                  WHERE synsets.synsetid == senses.synsetid 
+                        AND
+                        senses.wordid == words.wordid 
+                        AND
+                        synsets.pos == ?
+                        AND
+                        words.lemma LIKE ?
 
+                   ")
   $membersquery = $db.prepare("
       SELECT words.lemma, senses.sensekey
         FROM synsets, 
@@ -114,11 +160,25 @@ module WnQueriesHelper
   $all_semlinks = $distinctsemlinksquery.execute.to_a.flatten
   $all_lexlinks = $distinctlexlinksquery.execute.to_a.flatten
   $pos_map = $posmaplinksquery.execute.to_a.each.map {|initial, fullword| initial}
+  $full_pos_map = $posmaplinksquery.execute.to_a.inject({}) {|h,(k,v)| h[v]=k; h}
   $links_map = $linkstablequery.execute.to_a.inject({}) {|h,(k,v)| h[k]=v; h}
+  $reverse_links_map = $links_map.invert
 
-  def WnQueriesHelper.get_synsetids_and_pos(word)
+  def WnQueriesHelper.get_synsetids_and_pos(word, pos, exact)
     sids_and_pos = Hash.new
-    $synsetidposquery.execute(word).to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+    if exact=="1"
+      if (pos.nil? || pos.empty?)
+        $synsetidposqueryexact.execute(word).to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+      else
+        $synsetidposquerywithposexact.execute(pos, word).to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+      end
+    else
+      if (pos.nil? || pos.empty?)
+        $synsetidposquery.execute(word,"% #{word}","#{word} %").to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+      else
+        $synsetidposquerywithpos.execute(pos, word,"% #{word}","#{word} %").to_a.each.each{|sid, pos| sids_and_pos[sid] = pos}
+      end
+    end
     return sids_and_pos
   end
 
@@ -170,6 +230,7 @@ module WnQueriesHelper
   def WnQueriesHelper.apply_edit_to_database(edit)
     ApplyEditHelper.update_synset(edit)
     ApplyEditHelper.update_senses(edit)
+    ApplyEditHelper.update_semlinks(edit)
 
   end
 
@@ -177,12 +238,15 @@ module WnQueriesHelper
 end
 
 class SynsetInfo
-  attr_reader :synsets, :word
-  def initialize(word)
+  attr_reader :synsets, :word, :pos
+  def initialize(word, pos, exact)
     raise ArgumentError, "nil word" if word.nil?
+    pos = $full_pos_map[pos] unless $full_pos_map[pos].nil? # convert 'verb' to 'v', etc.
+    @pos = pos
     @word = word
     @synsets = Array.new
-    WnQueriesHelper.get_synsetids_and_pos(word).each {|synsetid,pos| @synsets.push(Synset.new(synsetid,pos))}
+    WnQueriesHelper.get_synsetids_and_pos(word, @pos, exact).each {|synsetid,pos| @synsets.push(Synset.new(synsetid,pos))}
+
     # try using the 'word' as a synsetid instead if no results came up
     if @synsets.empty?
       synsetid_synset = Synset.new(word)
@@ -216,11 +280,13 @@ end
 
 def wordnet_query_session
   session[:wordnetquery] = params[:wordnet][:query] rescue nil
+  session[:wordnetquerypos] = params[:wordnet][:pos] rescue nil
   session[:chosen_synsetid] = params[:synsetid] rescue nil
+  session[:wordnetqueryexact] = params[:wordnet][:exact_match] rescue nil
 end
 
-def wordnet_query(wnquery, synsetid)
-  wnresults = SynsetInfo.new(wnquery) rescue nil
+def wordnet_query(wnquery, synsetid, wnpos, exact)
+  wnresults = SynsetInfo.new(wnquery, wnpos, exact) rescue nil
   chosen_synset = Synset.new(synsetid) rescue nil
   return chosen_synset, wnresults
 end

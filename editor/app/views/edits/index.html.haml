@@ -11,7 +11,7 @@
       %th 
       %th
       %th
-      %th
+      %th= button_to "apply all", apply_all_path
       %th#updated_at_header{:class=>("hilite" if @sort_by=="updated_at")}= link_to "Last Updated", {:sort_by=> "updated_at", :sort_direction=>(sort_for_column("updated_at"))}, :id => "updated_at_header"
   %tbody
     - @all_edits.each do |edit|

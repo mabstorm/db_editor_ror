@@ -209,4 +209,35 @@ module ApplyEditHelper
     edit.save
 
   end
+
+  $contains_semlink_query = $db.prepare("
+    SELECT * FROM semlinks
+    WHERE synset1id==?
+    AND linkid==?
+    AND synset2id==?
+    ")
+  $add_semlink_query = $db.prepare("
+    INSERT INTO semlinks VALUES(?,?,?)
+    ")
+  def ApplyEditHelper.contains_semlink?(sid1, rel_id, sid2)
+    $contains_semlink_query.execute(sid1,rel_id,sid2).to_a.length > 0
+  end
+
+  def ApplyEditHelper.add_link(sid1, rel_id, sid2)
+    $add_semlink_query.execute(sid1, sid2, rel_id)
+  end
+
+
+  def ApplyEditHelper.update_semlinks(edit)
+
+    edit.semlinks.each do |relationship, synset2id|
+      rel_id = $reverse_links_map[relationship]
+      if ApplyEditHelper.contains_semlink?(edit.synsetid, rel_id, synset2id)
+        next
+      else
+        ApplyEditHelper.add_link(edit.synsetid, rel_id, synset2id)
+      end
+    end
+
+  end
 end

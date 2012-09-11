@@ -195,8 +195,8 @@ module EditsHelper
   end
 
   def render_wordnet_interface f
-    chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
-    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml] 
+    chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid], session[:wordnetquerypos], session[:wordnetqueryexact])
+    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery], :queryval_pos => session[:wordnetquerypos], :query_exact => session[:wordnetqueryexact] }, :handlers => [:haml] 
   end
 
   def render_semlinks(f, edit)
