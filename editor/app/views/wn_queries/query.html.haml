@@ -1,7 +1,17 @@
 
 = form_tag query_path do
-  = label :wn, :query, 'Query'
-  = text_field :wordnet, 'query', :value => queryval
+  %table#wordnet_query
+    %tbody
+      %tr
+        -#%td= label :wn, :query, 'Query'
+        -#%td= label :wn, :pos, 'Part of Speech'
+        %td= link_to_function 'Query', "$('input#wordnet_query').toggle()"
+        %td= link_to_function 'Part of Speech', "$('input#wordnet_pos').toggle()"
+        %td
+      %tr
+        %td= text_field :wordnet, 'query', :value => queryval, :size => '15'
+        %td= text_field :wordnet, 'pos', :value => queryval_pos, :size => '6'
+        %td= check_box :wordnet, 'exact_match', :checked => query_exact=='1' ? true : nil
 
   = submit_tag 'Submit query', :name => 'submit_wordnet_query'
 

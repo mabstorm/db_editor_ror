@@ -19,7 +19,7 @@ module EditsHelper
       next if new_arr[0].nil?
       if (new_arr[1].to_s=="" && new_arr[0]!="")
         pos = $pos_map.index(params[:edit][:pos])+1 rescue 1 #default to noun
-        new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%1:18:00::"
+        new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%x:xx:xx::"
       end
       members_hash[new_arr[0].to_s] = new_arr[1].to_s
     end
@@ -58,6 +58,50 @@ module EditsHelper
     return links.values
   end
 
+  # resets the entire lexlinks array of triples
+  def deserialize_lexlinks(lexlinks)
+    links = Hash.new
+    unless lexlinks.nil?
+      lexlinks.each_pair do |old_value, selected_link|
+        old_values = old_value.split('_') rescue next
+        puts "*************#{old_values}\t#{selected_link}"
+        if old_values=="enter new member"
+          old_values = ["enter new member", selected_link.first[1], selected_link.first[0].split('_')[2]]
+        end
+        puts "&&&&&&&&#{old_values}\t#{selected_link}"
+        next if old_values.empty?
+        next if old_values.length < 3
+        if old_values[0]=="enter new member"
+          puts "GOT HERE"
+          old_values[0] = params[:lexlink_edit][:new_value_for_lexlink] rescue "enter new member"
+        end
+        links[old_value] = Array.new if links[old_value].nil?
+        # setting sensekey1
+        links[old_value][0] = old_values[0]
+        # setting linktype
+        links[old_value][1] = selected_link
+        # setting sensekey2
+        links[old_value][2] = old_values[2]
+      end
+    end
+    # check to see if all links had a matching set
+    links.each do |key1, lexlink, key2|
+      #links.delete(key1) if (key1.nil? || lexlink.nil? || key2.nil? || key1.empty? || lexlink.empty? || key2.empty?)
+    end
+
+
+    if params[:create_lexlink]
+      name = "___" # temp name...
+      links[name] = Array.new
+      links[name][0] = "enter new member"
+      links[name][1] = "derivation"
+      links[name][2] = params[:create_lexlink]
+      params[:create_lexlink] = nil
+      puts links.values
+    end
+    params[:lexlinks] = links.values
+    return links.values
+  end
 
   # remove empty members
   def clean_hash(hash)
@@ -70,6 +114,7 @@ module EditsHelper
     params[:edit][:synsetid] = 0
     params[:edit][:definition] = ""
     params[:edit][:pos] = "n"
+    params[:edit][:lexdomainid] = nil
     create
   end
 
@@ -88,14 +133,21 @@ module EditsHelper
         to_delete = "#{mem.gsub('delete_','')}"
         params[:members].delete("old_#{to_delete}") 
       end
-    end
+    end rescue nil
     params[:semlinks_check_box].each_pair do |mem,to_del|
       if (to_del=="1")
         to_delete = "#{mem.gsub('delete_','')}"
         params[:semlinks].delete(to_delete)
         params[:semlinks].delete(to_delete.gsub('_','|'))
       end
-    end
+    end rescue nil
+    params[:lexlinks_check_box].each_pair do |mem,to_del|
+      if (to_del=="1")
+        to_delete = "#{mem.gsub('delete_','')}"
+        params[:lexlinks].delete(to_delete)
+        params[:lexlinks].delete(to_delete.gsub('_','|'))
+      end
+    end rescue nil
 
     params[:members] = clean_hash(params[:members])
   end
@@ -113,7 +165,9 @@ module EditsHelper
     edit.update_attributes({"synsetid" => params[:edit][:synsetid],
                           "definition" => params[:edit][:definition],
                           "pos" => params[:edit][:pos],
+                          "lexdomainid" => params[:edit][:lexdomainid],
                           "semlinks" => deserialize_semlinks(params[:semlinks]),
+                          "lexlinks" => deserialize_lexlinks(params[:lexlinks]),
                           "members" => deserialize_members(params[:members])})
 
   end
@@ -129,17 +183,23 @@ module EditsHelper
   def new_from_synset(edit)
     new_synset = Synset.new(params[:synsetid])
     new_synset.set_semlinks
+    new_synset.set_lexlinks
+    new_synset.set_lexdomainid
     if (is_blank edit)
       edit.update_attributes({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
+                          "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
+                          "lexlinks" => new_synset.lexlinks,
                           "semlinks" => new_synset.semlinks})
     else
       @edit = Edit.create({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
                           "pos" => new_synset.pos,
+                          "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
+                          "lexlinks" => new_synset.lexlinks,
                           "semlinks" => new_synset.semlinks})
     end
     flash[:notice] = "#{@edit.synsetid} was successfully imported"
@@ -147,21 +207,41 @@ module EditsHelper
   end
 
   def render_wordnet_interface f
-    chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid])
-    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery] }, :handlers => [:haml] 
+    chosen_synset, wnresults = wordnet_query(session[:wordnetquery], session[:chosen_synsetid], session[:wordnetquerypos], session[:wordnetqueryexact])
+    render :file => 'app/views/wn_queries/query', :locals => {:f => f, :chosen_synset => chosen_synset, :wnresults => wnresults, :queryval => session[:wordnetquery], :queryval_pos => session[:wordnetquerypos], :query_exact => session[:wordnetqueryexact] }, :handlers => [:haml] 
   end
 
-  def render_semlinks(f, synsetid, edit)
-    if edit.semlinks.nil?
-      puts "+++++++++++finding new semlinks+++++++++++"
+  def update_lexdomainid(edit)
+    if (edit.lexdomainid.nil?)
+      lexdomainid = WnQueriesHelper.get_lexdomainid(edit.synsetid)
+      edit.update_attribute(:lexdomainid, lexdomainid)
+    end
+  end
+
+  def render_semlinks(f, edit)
+    synsetid = edit.synsetid
+
+    update_lexdomainid(edit)
+
+    if (edit.semlinks.nil? || edit.semlinks.empty?)
       semlinks = WnQueriesHelper.get_semlinks(synsetid)
+      edit.update_attribute(:semlinks, semlinks)
     else
-      puts "++USING OLD SEMLINKS++"
       semlinks = edit.semlinks
     end
-    render :file => 'app/views/edits/semlinks', :locals => {:f => f, :semlinks => semlinks, :all_links => $all_links}, :handlers => [:haml]
+    render :file => 'app/views/edits/semlinks', :locals => {:f => f, :semlinks => semlinks, :all_semlinks => $all_semlinks}, :handlers => [:haml]
   end
 
+  def render_lexlinks(f, edit)
+    synsetid = edit.synsetid
+    if (edit.lexlinks.nil? || edit.lexlinks.empty?)
+      lexlinks = WnQueriesHelper.get_lexlinkskeys(synsetid)
+      edit.update_attribute(:lexlinks, lexlinks)
+    else
+      lexlinks = edit.lexlinks
+    end
+    render :file => 'app/views/edits/lexlinks', :locals => {:f => f, :lexlinks => lexlinks, :all_lexlinks => $all_lexlinks}, :handlers => [:haml]
+  end
 
   def render_freebase_interface f
     session[:this_query] = nil

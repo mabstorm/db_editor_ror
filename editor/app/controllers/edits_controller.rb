@@ -1,5 +1,5 @@
 class EditsController < ApplicationController
-  include EditsHelper, InfogetterHelper
+  include EditsHelper, InfogetterHelper, WnQueriesHelper
   def show
     return force_login if !admin?
     id = params[:id] # retrieve edit ID from URI route
@@ -53,6 +53,7 @@ class EditsController < ApplicationController
     @edit = Edit.create!({"synsetid"=>params[:edit][:synsetid],"definition"=>params[:edit][:definition],"pos"=>params[:edit][:pos]})
     @edit.update_attribute("members", deserialize_members(params[:members]))
     @edit.update_attribute("semlinks", deserialize_semlinks(params[:semlinks]))
+    update_lexdomainid(@edit)
     flash[:notice] = "#{@edit.synsetid} was successfully created."
     redirect_to edit_edit_path(@edit)
   end
@@ -82,23 +83,26 @@ class EditsController < ApplicationController
 
     if (params[:add_member])
       add_member_action
-      message = 'added'
+      message = 'added member'
     elsif (params[:delete_members])
       delete_member_action
-      message = 'deleted'
+      message = 'deleted member'
     elsif (params[:update_members])
       update_members_action
-      message = 'updated'
+      message = 'updated member'
     elsif (params[:create_semlink])
-      message = 'add semlink'
+      message = 'added semlink'
+    elsif (params[:create_lexlink])
+      message = 'added lexlink'
     end
 
-    if (params[:search_this_synsetid])
-      session[:wordnetquery] = params[:search_this_synsetid]
-      params[:wordnet][:query] = params[:search_this_synsetid]
+    if (params[:search_this])
+      session[:wordnetquery] = params[:search_this]
+      params[:wordnet][:query] = params[:search_this]
     end
 
     update_from_params(@edit) if message
+    update_lexdomainid(@edit)
 
     # searching for something on the side using Freebase
     update_freebase_session
@@ -107,8 +111,22 @@ class EditsController < ApplicationController
     wordnet_query_session
 
     #@edit.update_attributes!(params[:edit])
-    flash[:notice] = "#{@edit.synsetid} was successfully #{message}." if !message.nil?
+    flash[:notice] = "#{message}." if !message.nil?
     #redirect_to edit_edit_path(@edit)
+  end
+
+  def apply
+    return force_login if !admin?
+    @edit = Edit.find(params[:id])
+    WnQueriesHelper.apply_edit_to_database(@edit)
+    #flash[:notice] = ": ##{@edit.id} applied to database successfully"
+    redirect_to edits_path
+  end
+
+  def apply_all
+    Edit.all.each {|edit| WnQueriesHelper.apply_edit_to_database(edit) }
+    flash[:notice] = "applied to database successfully"
+    redirect_to edits_path
   end
 
   def destroy

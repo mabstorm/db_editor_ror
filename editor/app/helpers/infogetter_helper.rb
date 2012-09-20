@@ -9,6 +9,7 @@ module InfogetterHelper
   end
 
   def query(word)
+    return if (word.empty? || word.nil?)
     begin
       JSON.parse(HTTPClient.get_content(query_string(word.downcase.gsub(/\s/,'_'))))["result"]
     rescue

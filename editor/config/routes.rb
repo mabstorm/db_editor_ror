@@ -23,6 +23,9 @@ Editor::Application.routes.draw do
   match 'wordnet', :to => 'wn_queries#query', :as => 'query'
   match 'login', :to => 'sessions#new', :as => 'login'
   match 'logout', :to => 'sessions#destroy', :as => 'logout'
+  match 'edits/:id' => 'edits#apply', :via => :post
+  match 'apply_all', :to => 'edits#apply_all', :as => 'apply_all'
+  #match 'edits/index' => 'edits#apply_all', :via => :post
 
   # Sample resource route with options:
   #   resources :products do
