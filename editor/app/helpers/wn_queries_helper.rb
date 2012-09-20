@@ -173,6 +173,7 @@ module WnQueriesHelper
   $reverse_links_map = $links_map.invert
 
   def WnQueriesHelper.get_synsetids_and_pos(word, pos, exact)
+    return [] if word.empty?
     sids_and_pos = Hash.new
     if exact=="1"
       if (pos.nil? || pos.empty?)
@@ -191,33 +192,41 @@ module WnQueriesHelper
   end
 
   def WnQueriesHelper.get_pos(synsetid)
+    return "n" if synsetid==0
     $posquery.execute(synsetid).to_a.flatten.first
   end
 
   def WnQueriesHelper.get_synsetids(word)
-    get_synsetids_and_pos(word).keys
+    return [] if word.empty?
+    get_synsetids_and_pos(word, nil, 0).keys
   end
 
   def WnQueriesHelper.get_members(synsetid)
     members_and_keys = Hash.new
+    return members_and_keys if synsetid==0
     $membersquery.execute(synsetid).to_a.each.each {|member, key| members_and_keys[member] = key}
     return members_and_keys
   end
 
   def WnQueriesHelper.get_definition(synsetid)
+    return "" if synsetid==0
     $definitionquery.execute(synsetid).to_a.flatten.first
   end
   
   def WnQueriesHelper.get_semlinks(synsetid)
+    return [] if synsetid==0
     $semlinksquery.execute(synsetid).to_a
   end
   def WnQueriesHelper.get_lexlinks(synsetid)
+    return [] if synsetid==0
     $lexlinksquery.execute(synsetid,synsetid).to_a.each.map {|k1,linkid,k2| [k1,$links_map[linkid],k2]}
   end
   def WnQueriesHelper.get_lexdomainid(synsetid)
+    return 99 if synsetid==0
     $get_lexdomainid_query.execute(synsetid).to_a.first.first rescue 99
   end
   def WnQueriesHelper.get_lexlinkskeys(synsetid)
+    return [] if synsetid==0
     get_lexlinks(synsetid).map {|k1,link,k2| [senseid_to_sensekey(k1),link,senseid_to_sensekey(k2)] }
   end
 
@@ -261,12 +270,12 @@ class SynsetInfo
     WnQueriesHelper.get_synsetids_and_pos(word, @pos, exact).each {|synsetid,pos| @synsets.push(Synset.new(synsetid,pos))}
 
     # try using the 'word' as a synsetid instead if no results came up
-    if @synsets.empty?
+    if (@synsets.empty? && !word.empty?)
       synsetid_synset = Synset.new(word)
       @synsets.push(synsetid_synset) unless (synsetid_synset.definition.nil? && synsetid_synset.members_and_keys.empty?)
     end
     # try using the 'word' as a sensekey
-    if @synsets.empty?
+    if (@synsets.empty? && !word.empty?)
       sensekey_synset = Synset.new(WnQueriesHelper.get_synsetid_from_sensekey(word))
       @synsets.push(sensekey_synset) unless (sensekey_synset.definition.nil? && sensekey_synset.members_and_keys.empty?)
     end
@@ -307,29 +316,4 @@ def wordnet_query(wnquery, synsetid, wnpos, exact)
   return chosen_synset, wnresults
 end
 
-=begin
-def test_prepare_queries
-  testlist = %w{fish water waterfall miracle get fun wonderful}
-  
-  begin_time = Time.now
-  5.times do |t|
-    results = Array.new
-    testlist.each do |word|
-      results.push(WnQueriesHelper.get_synsetids(word))
-    end
-    puts t
-  end
-  end_time = Time.now
 
-  begin_time2 = Time.now
-  5.times do |t|
-    results = Array.new
-    testlist.each do |word|
-      results.push(WnQueriesHelper.old_get_synsetids(word))
-    end
-    puts t
-  end
-  end_time2 = Time.now
-  puts "new: #{end_time - begin_time}\nold: #{end_time2 - begin_time2}"
-end
-=end

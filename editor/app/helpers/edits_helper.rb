@@ -19,7 +19,7 @@ module EditsHelper
       next if new_arr[0].nil?
       if (new_arr[1].to_s=="" && new_arr[0]!="")
         pos = $pos_map.index(params[:edit][:pos])+1 rescue 1 #default to noun
-        new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%1:18:00::"
+        new_arr[1] = "#{new_arr[0].downcase.gsub(/\s/,'_')}%x:xx:xx::"
       end
       members_hash[new_arr[0].to_s] = new_arr[1].to_s
     end
@@ -64,29 +64,36 @@ module EditsHelper
     unless lexlinks.nil?
       lexlinks.each_pair do |old_value, selected_link|
         old_values = old_value.split('_') rescue next
+        puts "*************#{old_values}\t#{selected_link}"
+        if old_values=="enter new member"
+          old_values = ["enter new member", selected_link.first[1], selected_link.first[0].split('_')[2]]
+        end
+        puts "&&&&&&&&#{old_values}\t#{selected_link}"
         next if old_values.empty?
         next if old_values.length < 3
-        if old_values[0]=="[enter new member]"
-          old_values[0] = params[:lexlink_edit][:new_value_for_lexlink] rescue "[enter new member]"
+        if old_values[0]=="enter new member"
+          puts "GOT HERE"
+          old_values[0] = params[:lexlink_edit][:new_value_for_lexlink] rescue "enter new member"
         end
-        links[old_values] = Array.new if links[old_values].nil?
+        links[old_value] = Array.new if links[old_value].nil?
         # setting sensekey1
-        links[old_values][0] = old_values[0]
+        links[old_value][0] = old_values[0]
         # setting linktype
-        links[old_values][1] = selected_link
+        links[old_value][1] = selected_link
         # setting sensekey2
-        links[old_values][2] = old_values[2]
+        links[old_value][2] = old_values[2]
       end
     end
     # check to see if all links had a matching set
-    links.each_pair do |name, semlink|
-      links.delete(name) if (semlink.nil? || semlink[0].nil? || semlink[1].nil? || semlink[0].empty? || semlink[1].empty? ||semlink[2].nil? || semlink[2].empty?)
+    links.each do |key1, lexlink, key2|
+      #links.delete(key1) if (key1.nil? || lexlink.nil? || key2.nil? || key1.empty? || lexlink.empty? || key2.empty?)
     end
+
 
     if params[:create_lexlink]
       name = "___" # temp name...
       links[name] = Array.new
-      links[name][0] = "[enter new member]"
+      links[name][0] = "enter new member"
       links[name][1] = "derivation"
       links[name][2] = params[:create_lexlink]
       params[:create_lexlink] = nil

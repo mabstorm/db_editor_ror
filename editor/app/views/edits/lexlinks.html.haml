@@ -12,7 +12,7 @@
       - lexlinks.each do |sensekey1, link, sensekey2|
         %tr
           %td= check_box :lexlinks_check_box, "delete_#{sensekey1}_#{link}_#{sensekey2}"
-          -if sensekey1=="[enter new sensekey]"
+          -if sensekey1=="enter new member"
             %td= text_field 'lexlink_edit', 'new_value_for_lexlink', 'value' => sensekey1, :size=>8
           -else
             %td= button_tag sensekey1, :name => 'search_this', 'value' => sensekey1, :size=>8

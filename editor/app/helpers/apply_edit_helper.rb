@@ -110,7 +110,7 @@ module ApplyEditHelper
 
 
   # columns:
-  # wordid, casedwordid, synsetid, sensenum, lexid, tagcount, sensekey, new_sensekey
+  # wordid, casedwordid, synsetid, sensenum, lexid, tagcount, old_sensekey, sensekey
   def ApplyEditHelper.update_senses(edit)
 
     # Dealing with synsetid
@@ -189,7 +189,8 @@ module ApplyEditHelper
       end
 
       # possible old sensekey conflict
-      if (old_word.nil? && different_key_already_exists?(key, synsetid))
+      #if (old_word.nil? && different_key_already_exists?(key, synsetid))
+      if old_word.nil?
         key = "#{word.downcase.gsub(" ","_")}%#{edit.pos}:#{lexid}:#{sensenum}::"
         edit.members[cased] = key
       end
@@ -237,6 +238,11 @@ module ApplyEditHelper
 
     edit.semlinks.each do |relationship, synset2id|
       rel_id = $reverse_links_map[relationship]
+      # weird Rails bug seems to have caused this...
+      if synset2id.nil?
+        rel_id = $reverse_links_map[relationship["internal"][0]]
+        synset2id = relationship["internal"][1]
+      end
       if ApplyEditHelper.contains_semlink?(edit.synsetid, rel_id, synset2id)
         next
       else
