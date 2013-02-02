@@ -11,18 +11,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120911071806) do
+ActiveRecord::Schema.define(:version => 20130202074253) do
 
   create_table "edits", :force => true do |t|
     t.integer  "synsetid"
     t.text     "definition"
     t.text     "members"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
     t.string   "pos"
     t.text     "semlinks"
     t.text     "lexlinks"
     t.integer  "lexdomainid"
+    t.string   "author"
+    t.integer  "status",      :default => 0
   end
 
 end

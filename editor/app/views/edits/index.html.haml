@@ -9,10 +9,11 @@
       %th#definition_header{:class=>("hilite" if @sort_by=="definition")}= link_to "Definition", {:sort_by=> "definition", :sort_direction=>(sort_for_column("definition"))}, :id => "definition_header"
       %th#members_header{:class=>("hilite" if @sort_by=="members")}= link_to "Members", {:sort_by=> "members", :sort_direction=>(sort_for_column("members"))}, :id => "members_header"
       %th 
-      %th#lexdomainid_header{:class=>("hilite" if @sort_by=="lexdomainid")}= link_to "LID", {:sort_by=> "lexdomainid", :sort_direction=>(sort_for_column("lexdomainid"))}, :id => "lexdomainid_header"
       %th
       %th= button_to "apply all", apply_all_path
       %th#updated_at_header{:class=>("hilite" if @sort_by=="updated_at")}= link_to "Last Updated", {:sort_by=> "updated_at", :sort_direction=>(sort_for_column("updated_at"))}, :id => "updated_at_header"
+      %th#author_header{:class=>("hilite" if @sort_by=="author")}= link_to "Last Editor", {:sort_by=> "author", :sort_direction=>(sort_for_column("author"))}, :id => "author_header"
+      %th#status_header{:class=>("hilite" if @sort_by=="status")}= link_to "Status", {:sort_by=> "status", :sort_direction=>(sort_for_column("status"))}, :id => "status_header"
   %tbody
     - @all_edits.each do |edit|
       %tr
@@ -20,12 +21,19 @@
         %td= edit.definition
         %td= edit.members.keys.join(", ")
         %td= link_to "edit", edit_edit_path(edit)
-        %td= edit.lexdomainid
         -#%td= link_to "view", edit_path(edit)
         %td= button_to "delete", edit, :method=>:delete, :class=>:destroy
         %td= button_to "apply", edit, :method=>:post, :class=>:apply
         %td= edit.updated_at
-
+        %td= edit.author
+        -if (edit.status==0)
+          %td="Edited"
+        -elsif (edit.status==1)
+          %td="Saved"
+        -elsif (edit.status==-1)
+          %td="To Delete"
+        -elsif (edit.status==-2)
+          %td="Deleted"
 %br
 = link_to 'Add new synset', edit_edit_path(0)
 %br

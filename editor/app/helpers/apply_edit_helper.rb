@@ -211,7 +211,11 @@ module ApplyEditHelper
 
     end
     
-   
+    if edit.status==0
+      edit.status = 1
+    elsif edit.status==-1
+      edit.status = -2
+    end
     edit.save
 
   end
