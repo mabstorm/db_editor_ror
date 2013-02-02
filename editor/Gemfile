@@ -7,7 +7,7 @@ gem 'rails', '3.2.6'
 
 gem 'thin'
 group :development, :test do
-  gem 'ruby-debug19', :require => 'ruby-debug'
+#  gem 'ruby-debug19', :require => 'ruby-debug'
 end
 gem 'sqlite3'
 gem 'authlogic'
@@ -42,5 +42,5 @@ gem 'httpclient'
 # gem 'capistrano'
 
 # To use debugger
-# gem 'debugger'
+gem 'debugger'
 gem "haml"

@@ -2,9 +2,10 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   #force_ssl
 
+  include SessionsHelper
+
   def admin?
-    session[:username] == 'workingprogress' && session[:password] == 'simplepass1'
-    return true
+    return SessionsHelper.valid_login?(session[:username], session[:password])
   end
 
 end
