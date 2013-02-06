@@ -76,6 +76,9 @@ class EditsController < ApplicationController
     @edit = Edit.find params[:id]
     message = nil
 
+    @edit.author = session[:username]
+    @edit.save
+
 
     if (params[:synsetid])
       new_from_synset @edit
@@ -111,7 +114,11 @@ class EditsController < ApplicationController
     wordnet_query_session
 
     #@edit.update_attributes!(params[:edit])
+    @incomplete_message = ''
+    @incomplete_message += '  hypernym\n' unless has_hypernym?(@edit.semlinks)
+    @incomplete_message += '  definition\n' unless (!@edit.definition.nil? && @edit.definition.length > 0);
     flash[:notice] = "#{message}." if !message.nil?
+    @message = message;
     #redirect_to edit_edit_path(@edit)
   end
 

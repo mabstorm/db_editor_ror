@@ -176,6 +176,10 @@ module EditsHelper
     @sort_by == column && @sort_direction == "ASC" ? "DESC" : "ASC"
   end
 
+  def has_hypernym?(semlinks)
+    semlinks.inject(0) {|sum, (rel, sid)| sum+=1 if rel.include? "hypernym"; sum} > 0
+  end
+
   def is_blank(edit)
     edit.synsetid==0 && edit.definition == ""
   end
