@@ -76,6 +76,8 @@ class EditsController < ApplicationController
     @edit = Edit.find params[:id]
     message = nil
 
+    @edit.author = session[:username]
+    @edit.save
 
     if (params[:synsetid])
       new_from_synset @edit
