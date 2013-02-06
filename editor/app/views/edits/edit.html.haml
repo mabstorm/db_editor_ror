@@ -49,7 +49,10 @@
         = submit_tag 'Delete checked', :name => 'delete_members'
 
         %br
-        = link_to 'Return to list', edits_path
+        -if @incomplete_message!=''
+          = link_to 'Return to list', "javascript:missingInfoWarning((\'" + @incomplete_message + "\'));"
+        -else
+          = link_to 'Return to list', edits_path
         %br
         %br
         = render_semlinks f, @edit
@@ -70,3 +73,5 @@
       = debug session
   %br
   %br
+
+
