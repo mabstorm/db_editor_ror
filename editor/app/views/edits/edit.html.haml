@@ -28,6 +28,9 @@
         = link_to_function 'Definition', "$('textarea#edit_definition').toggle()"
         = text_area :edit, 'definition', :size => '10x8'
         %br
+        = link_to_function 'Example', "$('textarea#edit_example').toggle()"
+        = text_area :edit, 'example', :size => '10x2'
+        %br
         = link_to_function 'Synset Members', "$('table#members').toggle()"
         %br
         %table#members

@@ -1,5 +1,6 @@
 class Edit < ActiveRecord::Base
-  attr_accessible :definition, :synsetid, :members, :semlinks, :pos, :lexlinks, :lexdomainid, :author, :status
+  attr_accessible :definition, :synsetid, :members, :semlinks, :pos, :lexlinks, :lexdomainid, :author,
+                  :status, :example, :lexdomain
   serialize :members, Hash
   serialize :semlinks, Array
   serialize :lexlinks, Array

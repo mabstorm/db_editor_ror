@@ -101,7 +101,7 @@ form#editsform {
 #footer {
   clear: both;
 }
-#edit_definition {
+#edit_definition, #edit_example {
   width: 370px;
 }
 #edit_lexdomainid {

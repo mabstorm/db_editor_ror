@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130202074253) do
+ActiveRecord::Schema.define(:version => 20130211141528) do
 
   create_table "edits", :force => true do |t|
     t.integer  "synsetid"
@@ -25,6 +25,8 @@ ActiveRecord::Schema.define(:version => 20130202074253) do
     t.integer  "lexdomainid"
     t.string   "author"
     t.integer  "status",      :default => 0
+    t.string   "example"
+    t.string   "lexdomain"
   end
 
 end

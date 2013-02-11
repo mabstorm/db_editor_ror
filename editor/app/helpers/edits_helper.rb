@@ -164,6 +164,7 @@ module EditsHelper
 =end
     edit.update_attributes({"synsetid" => params[:edit][:synsetid],
                           "definition" => params[:edit][:definition],
+                          "example" => params[:edit][:example],
                           "pos" => params[:edit][:pos],
                           "lexdomainid" => params[:edit][:lexdomainid],
                           "semlinks" => deserialize_semlinks(params[:semlinks]),
@@ -192,6 +193,7 @@ module EditsHelper
     if (is_blank edit)
       edit.update_attributes({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
+                          "example" => new_synset.example,
                           "pos" => new_synset.pos,
                           "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
@@ -200,6 +202,7 @@ module EditsHelper
     else
       @edit = Edit.create({"synsetid" => new_synset.synsetid,
                           "definition" => new_synset.definition,
+                          "example" => new_synset.example,
                           "pos" => new_synset.pos,
                           "lexdomainid" => new_synset.lexdomainid,
                           "members" => new_synset.members_and_keys,
