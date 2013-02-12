@@ -27,12 +27,19 @@ module ApplyEditHelper
   $sensekeytosenseid = $db.prepare("
     SELECT senseid FROM senses WHERE sensekey==?
   ")
+  $addsampletosynset = $db.prepare("
+    INSERT INTO samples
+    VALUES(?,?,?)
+  ")
   def ApplyEditHelper.new_synsetid
     $db.query("SELECT max(synsetid) FROM senses").to_a.first.first + 1
   end
   def ApplyEditHelper.sensekey_to_senseid(sensekey)
     $sensekeytosenseid.execute(sensekey).to_a.flatten.first
-  end 
+  end
+  def ApplyEditHelper.add_sample_to_synset(synsetid, samplenum, sample)
+    $addsampletosynset.execute(synsetid, samplenum, sample)
+  end
 
   # columns:
   # id, synsetid, pos, lexdomain, definition
@@ -54,6 +61,10 @@ module ApplyEditHelper
     end
     # update the edits synsetid to make sure we don't add multiple times to db
     edit.update_attributes({"synsetid" => $get_synsetid_from_definition.execute(edit.definition).to_a.first.first})
+    if !edit.nil? && !edit.example.empty?
+      ApplyEditHelper.add_sample_to_synset(edit.synsetid, 1, edit.example)
+    end
+
   end
 
 

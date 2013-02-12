@@ -21,7 +21,7 @@ module WnQueriesHelper
                         AND
                         senses.wordid == words.wordid 
                         AND
-                        (words.lemma LIKE ?
+                        (words.lemma == ?
                                           OR
                          words.lemma LIKE ?
                                           OR
@@ -38,7 +38,7 @@ module WnQueriesHelper
                         AND
                         synsets.pos == ?
                         AND
-                        (words.lemma LIKE ?
+                        (words.lemma == ?
                                           OR
                          words.lemma LIKE ?
                                           OR
@@ -53,7 +53,7 @@ module WnQueriesHelper
                         AND
                         senses.wordid == words.wordid 
                         AND
-                        words.lemma LIKE ?
+                        words.lemma == ?
   
                    ")
   $synsetidposquerywithposexact = $db.prepare("
@@ -67,7 +67,7 @@ module WnQueriesHelper
                         AND
                         synsets.pos == ?
                         AND
-                        words.lemma LIKE ?
+                        words.lemma == ?
 
                    ")
   $membersquery = $db.prepare("
