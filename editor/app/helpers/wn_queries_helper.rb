@@ -283,10 +283,11 @@ class SynsetInfo
 end
 
 class Synset
-  attr_accessor :synsetid, :pos, :members_and_keys, :definition, :semlinks, :lexlinks, :lexdomainid
+  attr_accessor :synsetid, :pos, :members_and_keys, :definition, :semlinks, :lexlinks, :lexdomainid, :example
   def initialize(synsetid, pos=nil)
     raise ArgumentError, "nil synsetid" if synsetid.nil?
     @synsetid = synsetid
+    @example = ''
     pos = WnQueriesHelper.get_pos(synsetid) if pos.nil?
     @pos = pos
     @members_and_keys = WnQueriesHelper.get_members(synsetid)
